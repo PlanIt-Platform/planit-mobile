@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Planit - Mobile</string>
+    <string name="bot_bar_navigate_to_profile">Profile</string>
+    <string name="bot_bar_navigate_to_home">Home</string>
+    <string name="bot_bar_navigate_to_events">Events</string>
+    <string name="sports_and_outdoor">Sports and Outdoor</string>
+    <string name="Culture">Culture</string>
+    <string name="Education">Education</string>
+    <string name="Entertainment">Entertainment</string>
+    <string name="volunteering">Volunteering</string>
+</resources>
