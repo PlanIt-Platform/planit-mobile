@@ -1,4 +1,4 @@
-package com.example.planit_mobile.ui.screens.auth.login
+package com.example.planit_mobile.ui.screens.searchEvent
 
 import android.app.Activity
 import android.content.Intent
@@ -13,25 +13,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.example.planit_mobile.PlanItDependencyProvider
-import com.example.planit_mobile.ui.screens.auth.Success
-import com.example.planit_mobile.ui.screens.common.Error
-import com.example.planit_mobile.ui.screens.common.ErrorPopup
+import com.example.planit_mobile.ui.screens.common.Idle
+import com.example.planit_mobile.ui.screens.common.getOrNull
+import com.example.planit_mobile.ui.screens.common.idle
 import com.example.planit_mobile.ui.screens.home.HomeActivity
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
 
-
-class LoginActivity : ComponentActivity() {
+class SearchEventActivity : ComponentActivity() {
 
     private val dependencies by lazy { application as PlanItDependencyProvider }
 
-    private val viewModel by viewModels<LoginViewModel> {
-        LoginViewModel.factory(dependencies.userService, dependencies.sessionStorage)
+    private val viewModel by viewModels<SearchEventViewModel> {
+        SearchEventViewModel.factory(dependencies.eventService, dependencies.sessionStorage)
     }
 
     companion object {
         fun navigateTo(origin: Activity) {
-            val intent = Intent(origin, LoginActivity::class.java)
+            val intent = Intent(origin, SearchEventActivity::class.java)
             origin.startActivity(intent)
         }
     }
@@ -39,30 +38,20 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            viewModel.loadState.collect {
-                if (it is Success) HomeActivity.navigateTo(this@LoginActivity)
-            }
-        }
-
         setContent {
-            val errorMessage = viewModel.errorState.collectAsState(initial = Error("")).value.message
             PlanitMobileTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LoginScreen(
-                        onLogin = { email, password ->
-                            viewModel.login(email, password)
+                    SearchEventScreen(
+                        onProfileRequested = { navigateTo(this) },
+                        onHomeRequested = { HomeActivity.navigateTo(this) },
+                        onEventsRequested = { navigateTo(this) },
+                        onSearch = { searchQuery ->
+                            viewModel.search(searchQuery)
                         },
-                        onBackRequested = { finish() },
                     )
-                    ErrorPopup(
-                        showDialog = errorMessage != "",
-                        errorMessage = errorMessage) {
-                        viewModel.dismissError()
-                    }
                 }
             }
         }

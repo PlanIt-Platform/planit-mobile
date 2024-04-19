@@ -7,7 +7,9 @@ import com.example.myapplication.sessionStorage.SessionDataStore
 import com.example.planit_mobile.services.UserService
 import com.example.planit_mobile.services.utils.launchAndRequest
 import com.example.planit_mobile.ui.screens.auth.succeeded
+import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.LoadState
+import com.example.planit_mobile.ui.screens.common.errorMessage
 import com.example.planit_mobile.ui.screens.common.idle
 import com.example.planit_mobile.ui.screens.common.loading
 import kotlinx.coroutines.flow.Flow
@@ -27,9 +29,12 @@ class LoginViewModel(
     }
 
     private val loadStateFlow: MutableStateFlow<LoadState<String>> = MutableStateFlow(idle())
+    private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
 
     val loadState: Flow<LoadState<String>>
         get() = loadStateFlow.asStateFlow()
+    val errorState: Flow<Error>
+        get() = errorStateFlow.asStateFlow()
 
     fun login(emailOrName: String, password: String) {
         loadStateFlow.value = loading()
@@ -42,7 +47,12 @@ class LoginViewModel(
                     userID = it.id,
                 )
                 loadStateFlow.value = succeeded()
-            }
+            },
+            onFailure = {errorStateFlow.value = errorMessage(it.message.toString()) }
         )
+    }
+
+    fun dismissError() {
+        errorStateFlow.value = Error("")
     }
 }

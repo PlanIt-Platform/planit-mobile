@@ -33,11 +33,13 @@ fun RegisterScreen(
     onRegister: (String, String, String, String) -> Unit,
     onEdit: (String, String, String) -> Unit,
     onBackRequested: () -> Unit,
+    showError: Boolean
 ) {
     var steps by remember { mutableStateOf<RegisterState>(Step1State) }
     var userInfo by remember { mutableStateOf(
         UserInfo(0, "", "", "", "", "", ""))
     }
+    if (showError) steps = Step1State
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -50,7 +52,7 @@ fun RegisterScreen(
                     userInfo = userInfo,
                     setUserInfo = { userInfo = it },
                     onRegister = onRegister,
-                    onNext = { steps = Step2State }
+                    onNext = { steps = Step2State },
                 )
             }
             Step2State -> {
@@ -120,8 +122,8 @@ fun Step1(
     )
     Button(
         onClick = {
-            onNext()
             onRegister(userInfo.username, userInfo.name, userInfo.email, userInfo.password)
+            onNext()
         },
         content = { Text("Next") },
     )
@@ -129,7 +131,7 @@ fun Step1(
 
 @Composable
 fun Step2(setInterests: (String) -> Unit, setStep: (RegisterState) -> Unit) {
-    val interests = listOf("Sports and Outdoor", "Culture", "Education", "Entertainment", "Volunteering")
+    val interests = listOf("Sports and Outdoor", "Culture", "Education", "Entertainment", "Charity")
     Title(text = "What are you interested in?", Color.White, 30.sp)
     Column {
         for (interest in interests) {

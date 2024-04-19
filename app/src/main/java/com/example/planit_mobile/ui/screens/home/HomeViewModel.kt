@@ -37,6 +37,7 @@ class HomeViewModel(
             onSuccess = { _, _, _, _ ->
                 logStateFlow.value = false
             },
+            onFailure = {},
             sessionStorage = sessionStorage
         )
     }

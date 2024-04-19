@@ -1,6 +1,7 @@
 package com.example.planit_mobile.services.utils
 
 import android.util.Log
+import com.example.planit_mobile.services.ErrorResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
@@ -71,7 +72,8 @@ class ApiRequests(val client: OkHttpClient, val gson: Gson) {
             override fun onResponse(call: Call, response: Response) {
                 val bodyRes = response.body
                 if (!response.isSuccessful || bodyRes == null) {
-                    it.resumeWithException(Exception("Failure: ${response.code}"))
+                    val errorResponse = gson.fromJson(bodyRes?.string(), ErrorResponse::class.java)
+                    it.resumeWithException(Exception(" ${errorResponse.error}."))
                 } else {
                     it.resumeWith(
                         Result.success(

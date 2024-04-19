@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.planit_mobile.PlanItDependencyProvider
 import com.example.planit_mobile.ui.screens.auth.guest.GuestActivity
 import com.example.planit_mobile.ui.screens.profile.UserProfileActivity
+import com.example.planit_mobile.ui.screens.searchEvent.SearchEventActivity
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
 
@@ -56,8 +57,8 @@ class HomeActivity : ComponentActivity() {
                     HomeScreen(
                         onLogoutRequested = { viewModel.logout() },
                         onProfileRequested = { UserProfileActivity.navigateTo(this) },
-                        onHomeRequested = { HomeActivity.navigateTo(this) },
-                        onEventsRequested = { /*EventsActivity.navigateTo(this)*/ }
+                        onHomeRequested = { navigateTo(this) },
+                        onEventsRequested = { SearchEventActivity.navigateTo(this) }
                     )
                 }
             }

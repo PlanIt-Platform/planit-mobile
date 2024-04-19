@@ -1,9 +1,12 @@
 package com.example.planit_mobile.ui.screens.common
 
 open class LoadState<out T>
+data class Error(val message: String): LoadState<String>()
 object Idle : LoadState<Nothing>()
 object Loading : LoadState<Nothing>()
 data class Loaded<T>(val value: T) : LoadState<T>()
+
+fun errorMessage(message: String): Error = Error(message)
 
 fun idle(): Idle = Idle
 fun loading(): Loading = Loading

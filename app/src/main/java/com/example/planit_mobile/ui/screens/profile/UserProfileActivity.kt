@@ -6,18 +6,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.example.planit_mobile.PlanItDependencyProvider
+import com.example.planit_mobile.ui.screens.common.Error
+import com.example.planit_mobile.ui.screens.common.ErrorPopup
 import com.example.planit_mobile.ui.screens.common.Idle
 import com.example.planit_mobile.ui.screens.common.getOrNull
 import com.example.planit_mobile.ui.screens.common.idle
 import com.example.planit_mobile.ui.screens.home.HomeActivity
-import com.example.planit_mobile.ui.theme.PlanitMobileTheme
+import com.example.planit_mobile.ui.screens.searchEvent.SearchEventActivity
 import kotlinx.coroutines.launch
 
 class UserProfileActivity : ComponentActivity() {
@@ -54,14 +52,20 @@ class UserProfileActivity : ComponentActivity() {
         }
         setContent {
             val state = viewModel.loadState.collectAsState(initial = idle()).value.getOrNull()
+            val errorMessage = viewModel.errorState.collectAsState(initial = Error("")).value.message
             if (state != null) {
                 UserProfileScreen(
                     userInfo = state,
                     onBackRequested = { finish() },
                     onProfileRequested = { navigateTo(this) },
                     onHomeRequested = { HomeActivity.navigateTo(this) },
-                    onEventsRequested = { /*EventsActivity.navigateTo(this)*/ }
+                    onEventsRequested = { SearchEventActivity.navigateTo(this) }
                 )
+                ErrorPopup(
+                    showDialog = errorMessage != "",
+                    errorMessage = errorMessage) {
+                    viewModel.dismissError()
+                }
             }
         }
     }

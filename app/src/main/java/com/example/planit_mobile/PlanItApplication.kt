@@ -7,7 +7,9 @@ import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import androidx.datastore.preferences.core.Preferences
 import com.example.myapplication.sessionStorage.SessionDataStore
+import com.example.planit_mobile.services.EventService
 import com.example.planit_mobile.services.UserService
+import com.example.planit_mobile.services.providers.EventProvider
 import com.example.planit_mobile.services.providers.UserProvider
 
 
@@ -35,6 +37,11 @@ class PlanItApplication : Application(), PlanItDependencyProvider {
      * The service used to fetch user related info
      */
     override val userService: UserService = UserProvider(httpClient, gson)
+
+    /**
+     * The service used to fetch event related info
+     */
+    override val eventService: EventService = EventProvider(httpClient, gson)
 
     /**
      * The storage used to persist the user session

@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextField(
     text: String,

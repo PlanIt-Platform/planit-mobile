@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.example.planit_mobile.PlanItDependencyProvider
@@ -18,6 +19,8 @@ import com.example.planit_mobile.ui.screens.auth.Success
 import com.example.planit_mobile.ui.screens.home.HomeActivity
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
+import com.example.planit_mobile.ui.screens.common.Error
+import com.example.planit_mobile.ui.screens.common.ErrorPopup
 
 
 class RegisterActivity : ComponentActivity() {
@@ -46,6 +49,7 @@ class RegisterActivity : ComponentActivity() {
         }
 
         setContent {
+            val errorMessage = viewModel.errorState.collectAsState(initial = Error("")).value.message
             PlanitMobileTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -59,7 +63,13 @@ class RegisterActivity : ComponentActivity() {
                             viewModel.editUser(name, interests, description)
                         },
                         onBackRequested = { finish() },
+                        showError = errorMessage != ""
                     )
+                    ErrorPopup(
+                        showDialog = errorMessage != "",
+                        errorMessage = errorMessage) {
+                          viewModel.dismissError()
+                    }
                 }
             }
         }

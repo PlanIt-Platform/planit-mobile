@@ -8,11 +8,13 @@ import com.example.planit_mobile.services.UserService
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
 import com.example.planit_mobile.services.utils.launchAndRequest
 import com.example.planit_mobile.ui.screens.common.LoadState
+import com.example.planit_mobile.ui.screens.common.errorMessage
 import com.example.planit_mobile.ui.screens.common.idle
 import com.example.planit_mobile.ui.screens.common.loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.planit_mobile.ui.screens.common.Error
 
 class RegisterViewModel(
     private val userService: UserService,
@@ -26,9 +28,12 @@ class RegisterViewModel(
     }
 
     private val loadStateFlow: MutableStateFlow<LoadState<Int>> = MutableStateFlow(idle())
+    private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
 
     val loadState: Flow<LoadState<Int>>
         get() = loadStateFlow.asStateFlow()
+    val errorState: Flow<Error>
+        get() = errorStateFlow.asStateFlow()
 
     fun register(username: String, name: String, email: String, password: String) {
         loadStateFlow.value = loading()
@@ -41,7 +46,8 @@ class RegisterViewModel(
                     userID = it.id,
                 )
                 loadStateFlow.value = step1()
-            }
+            },
+            onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) }
         )
     }
 
@@ -53,7 +59,12 @@ class RegisterViewModel(
             onSuccess = { _, _, _, _ ->
                 loadStateFlow.value = step3()
             },
+            onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
             sessionStorage = sessionStorage
         )
+    }
+
+    fun dismissError() {
+        errorStateFlow.value = Error("")
     }
 }

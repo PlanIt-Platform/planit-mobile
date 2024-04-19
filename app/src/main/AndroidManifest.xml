@@ -40,6 +40,9 @@
         <activity
             android:name=".ui.screens.profile.UserProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.screens.searchEvent.SearchEventActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
