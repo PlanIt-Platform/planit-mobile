@@ -51,16 +51,30 @@ class UserProvider(
             refreshToken = refreshToken,
         )
 
-    override suspend fun fetchUserInfo(uID: Int): User =
+    override suspend fun fetchUserInfo(
+        uID: Int,
+        userAccessToken: String,
+        userRefreshToken: String
+    ): User =
         ApiRequests(client, gson).getRequest(
-            "$USER_URL/$uID"
+            "$USER_URL/$uID",
+            accessToken = userAccessToken,
+            refreshToken = userRefreshToken
         )
 
-    override suspend fun editUser(uID: Int, name: String, interests: List<String>, description: String) {
+    override suspend fun editUser(
+        userAccessToken: String,
+        userRefreshToken: String,
+        name: String,
+        interests: List<String>,
+        description: String
+    ) {
         val userData = EditUserInputModel(name, interests, description)
         return ApiRequests(client, gson).putRequest(
-            "$USER_URL/$uID/edit",
-            gson.toJson(userData).toString()
+            USER_URL,
+            gson.toJson(userData).toString(),
+            accessToken = userAccessToken,
+            refreshToken = userRefreshToken
         )
     }
 }

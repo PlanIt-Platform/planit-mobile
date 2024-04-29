@@ -45,17 +45,26 @@ interface UserService {
      * Fetches information about a specific user.
      *
      * @param uID The unique identifier of the user.
+     * @param userAccessToken The access token for the user.
+     * @param userRefreshToken The refresh token for the user.
      * @return The details of the requested user.
      */
-    suspend fun fetchUserInfo(uID: Int): User
+    suspend fun fetchUserInfo(uID: Int, userAccessToken: String, userRefreshToken: String): User
 
     /**
      * Edits the interests and description of a user.
      *
-     * @param uID The unique identifier of the user.
+     * @param userAccessToken The access token for the user.
+     * @param userRefreshToken The refresh token for the user.
      * @param name The name of the user.
      * @param interests The interests of the user.
      * @param description The description of the user.
      */
-    suspend fun editUser(uID: Int, name: String, interests: List<String>, description: String)
+    suspend fun editUser(
+        userAccessToken: String,
+        userRefreshToken: String,
+        name: String,
+        interests: List<String>,
+        description: String
+    )
 }
