@@ -25,6 +25,17 @@ class HomeViewModel(
 
     private val logStateFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
+    suspend fun isLogged() : Boolean {
+        val isLoggedIn = kotlin.runCatching { sessionStorage.isLogged() }.getOrNull()
+        return isLoggedIn ?: false
+    }
+
+    fun refreshData() {
+        viewModelScope.launch {
+            logStateFlow.value = sessionStorage.isLogged()
+        }
+    }
+
     val logState: Flow<Boolean>
         get() = logStateFlow.asStateFlow()
 

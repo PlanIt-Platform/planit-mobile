@@ -17,6 +17,7 @@ import com.example.planit_mobile.ui.screens.common.Idle
 import com.example.planit_mobile.ui.screens.common.getOrNull
 import com.example.planit_mobile.ui.screens.common.idle
 import com.example.planit_mobile.ui.screens.home.HomeActivity
+import com.example.planit_mobile.ui.screens.profile.UserProfileActivity
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
 
@@ -45,9 +46,9 @@ class SearchEventActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     SearchEventScreen(
-                        onProfileRequested = { navigateTo(this) },
+                        onProfileRequested = { UserProfileActivity.navigateTo(this) },
                         onHomeRequested = { HomeActivity.navigateTo(this) },
-                        onEventsRequested = { navigateTo(this) },
+                        onEventsRequested = { viewModel.refreshData() },
                         onSearch = { searchQuery ->
                             viewModel.search(searchQuery)
                         },

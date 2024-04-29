@@ -41,6 +41,9 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
+            if(!viewModel.isLogged()){
+                GuestActivity.navigateTo(this@HomeActivity)
+            }
             viewModel.logState.collect {
                 if (!it) {
                     GuestActivity.navigateTo(this@HomeActivity)
@@ -57,7 +60,7 @@ class HomeActivity : ComponentActivity() {
                     HomeScreen(
                         onLogoutRequested = { viewModel.logout() },
                         onProfileRequested = { UserProfileActivity.navigateTo(this) },
-                        onHomeRequested = { navigateTo(this) },
+                        onHomeRequested = { viewModel.refreshData() },
                         onEventsRequested = { SearchEventActivity.navigateTo(this) }
                     )
                 }

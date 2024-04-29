@@ -32,6 +32,9 @@ class SearchEventViewModel(
     val loadState: Flow<LoadState<User>>
         get() = loadStateFlow.asStateFlow()
 
+    fun refreshData() {
+    }
+
     fun search(query: String) {
     }
 

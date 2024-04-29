@@ -1,10 +1,12 @@
 package com.example.planit_mobile.ui.screens.auth.register
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
@@ -12,6 +14,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.ui.screens.common.Title
 import com.example.planit_mobile.ui.screens.common.TextField
+import com.example.planit_mobile.ui.screens.common.backArrow
 
 
 @Composable
@@ -40,36 +45,43 @@ fun RegisterScreen(
         UserInfo(0, "", "", "", "", "", ""))
     }
     if (showError) steps = Step1State
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 200.dp),
-    ) {
-        when (steps) {
-           Step1State -> {
-                Step1(
-                    userInfo = userInfo,
-                    setUserInfo = { userInfo = it },
-                    onRegister = onRegister,
-                    onNext = { steps = Step2State },
-                )
-            }
-            Step2State -> {
-                Step2(setInterests = { newInterest ->
-                    userInfo = userInfo.copy(interests = if (userInfo.interests.isEmpty()) {
-                        newInterest
-                    } else {
-                        "${userInfo.interests}, $newInterest"
-                    })
-                }, setStep = { steps = it})
-            }
-            Step3State -> {
-                Step3(
-                    userInfo = userInfo,
-                    setDescription = {userInfo = userInfo.copy(description = it)},
-                    onEdit = onEdit
-                )
+    Box( modifier = Modifier.fillMaxSize() ){
+        backArrow (Color.White) { onBackRequested() }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 200.dp),
+        ) {
+            when (steps) {
+                Step1State -> {
+                    Step1(
+                        userInfo = userInfo,
+                        setUserInfo = { userInfo = it },
+                        onRegister = onRegister,
+                        onNext = { steps = Step2State },
+                    )
+                }
+
+                Step2State -> {
+                    Step2(setInterests = { newInterest ->
+                        userInfo = userInfo.copy(
+                            interests = if (userInfo.interests.isEmpty()) {
+                                newInterest
+                            } else {
+                                "${userInfo.interests}, $newInterest"
+                            }
+                        )
+                    }, setStep = { steps = it })
+                }
+
+                Step3State -> {
+                    Step3(
+                        userInfo = userInfo,
+                        setDescription = { userInfo = userInfo.copy(description = it) },
+                        onEdit = onEdit
+                    )
+                }
             }
         }
     }

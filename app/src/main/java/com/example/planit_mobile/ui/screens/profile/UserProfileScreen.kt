@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
+import com.example.planit_mobile.ui.screens.common.backArrow
 
 @Composable
 fun UserProfileScreen(
@@ -49,20 +50,21 @@ fun UserProfileScreen(
             )
         },
     ) {
-        UpperHalf(padding = it, userInfo = userInfo)
+        UpperHalf(padding = it, userInfo = userInfo, onBackRequested)
         MiddleSection(userInfo = userInfo)
         LowerHalf(userInfo = userInfo)
     }
 }
 
 @Composable
-fun UpperHalf(padding: PaddingValues, userInfo: User){
+fun UpperHalf(padding: PaddingValues, userInfo: User, onBackRequested: () -> Unit){
     Box(
         modifier = Modifier
             .padding(padding)
             .height(275.dp)
             .background(color = Color(28, 155, 139, 255))
     ) {
+        backArrow (Color.White) { onBackRequested() }
         Column(
             modifier = Modifier
                 .fillMaxSize()
