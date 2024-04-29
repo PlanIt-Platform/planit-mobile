@@ -41,14 +41,15 @@ class UserProfileViewModel(
     suspend fun fetchUser(id: Int? = null) {
         loadStateFlow.value = loading()
         val userId = sessionStorage.getUserID() ?: return
-        launchAndRequest(
-            request = {
-                service.fetchUserInfo(id ?: userId)
+        launchAndAuthenticateRequest(
+            request = { userAccessToken, userRefreshToken, _ ->
+                service.fetchUserInfo(id ?: userId, userAccessToken, userRefreshToken)
             },
-            onSuccess = { res ->
+            onSuccess = { res, _, _, _ ->
                 loadStateFlow.value = loaded(res)
             },
-            onFailure = {errorStateFlow.value = errorMessage(it.message.toString()) }
+            onFailure = {errorStateFlow.value = errorMessage(it.message.toString()) },
+            sessionStorage = sessionStorage
         )
     }
 

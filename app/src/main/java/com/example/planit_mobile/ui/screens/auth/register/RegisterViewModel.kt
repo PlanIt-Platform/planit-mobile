@@ -53,8 +53,8 @@ class RegisterViewModel(
 
     fun editUser(name: String, interests: String, description: String) {
         launchAndAuthenticateRequest(
-            request = { _, _, userId ->
-                userService.editUser(userId, name, interests.split(","), description)
+            request = { userAccessToken, userRefreshToken, userId ->
+                userService.editUser(userAccessToken, userRefreshToken, name, interests.split(","), description)
                       },
             onSuccess = { _, _, _, _ ->
                 loadStateFlow.value = step3()
