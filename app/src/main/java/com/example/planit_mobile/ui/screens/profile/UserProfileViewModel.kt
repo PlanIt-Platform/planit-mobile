@@ -56,4 +56,8 @@ class UserProfileViewModel(
     fun dismissError() {
         errorStateFlow.value = Error("")
     }
+
+    suspend fun refreshData() {
+        fetchUser()
+    }
 }

@@ -52,4 +52,11 @@ class HomeViewModel(
             sessionStorage = sessionStorage
         )
     }
+
+    private val _homeTabState = MutableStateFlow(HomeTabState.HOME)
+    val homeTabState: Flow<HomeTabState> = _homeTabState.asStateFlow()
+
+    fun setHomeTabState(homeTabState: HomeTabState) {
+        _homeTabState.value = homeTabState
+    }
 }

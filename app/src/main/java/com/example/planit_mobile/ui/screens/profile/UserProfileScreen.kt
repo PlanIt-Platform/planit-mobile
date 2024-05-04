@@ -32,7 +32,6 @@ import com.example.planit_mobile.ui.screens.common.backArrow
 @Composable
 fun UserProfileScreen(
     userInfo: User,
-    onBackRequested: () -> Unit,
     onProfileRequested: () -> Unit,
     onHomeRequested: () -> Unit,
     onEventsRequested: () -> Unit,
@@ -42,29 +41,28 @@ fun UserProfileScreen(
             .fillMaxSize(),
         bottomBar = {
             BotBar(navigation =
-                NavigationHandlers(
-                    onProfileRequested = onProfileRequested,
-                    onHomeRequested = onHomeRequested,
-                    onEventsRequested = onEventsRequested
-                )
+            NavigationHandlers(
+                onProfileRequested = onProfileRequested,
+                onHomeRequested = onHomeRequested,
+                onEventsRequested = onEventsRequested
+            )
             )
         },
     ) {
-        UpperHalf(padding = it, userInfo = userInfo, onBackRequested)
+        UpperHalf(padding = it, userInfo = userInfo)
         MiddleSection(userInfo = userInfo)
         LowerHalf(userInfo = userInfo)
     }
 }
 
 @Composable
-fun UpperHalf(padding: PaddingValues, userInfo: User, onBackRequested: () -> Unit){
+fun UpperHalf(padding: PaddingValues, userInfo: User){
     Box(
         modifier = Modifier
             .padding(padding)
             .height(275.dp)
             .background(color = Color(28, 155, 139, 255))
     ) {
-        backArrow (Color.White) { onBackRequested() }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -185,7 +183,6 @@ fun PreviewUserProfileScreen() {
             "Im nice",
             "daniel@gmail.com",
             listOf("Sports and Outdoor", "Culture", "Education", "Entertainment", /*"Volunteering"*/)),
-        onBackRequested = {},
         onProfileRequested = {},
         onHomeRequested = {},
         onEventsRequested = {}

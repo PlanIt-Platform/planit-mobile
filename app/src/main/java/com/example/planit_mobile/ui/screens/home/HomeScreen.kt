@@ -15,8 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
+import com.example.planit_mobile.ui.screens.profile.UserProfileScreen
 
 @Composable
 fun HomeScreen(
@@ -73,4 +76,16 @@ fun BackgroundBox(
             }
         }
     }
+}
+
+
+@Preview
+@Composable
+fun PreviewUserProfileScreen() {
+    HomeScreen(
+        onLogoutRequested = {},
+        onProfileRequested = {},
+        onHomeRequested = {},
+        onEventsRequested = {},
+    )
 }
