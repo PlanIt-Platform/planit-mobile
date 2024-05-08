@@ -24,6 +24,7 @@ import com.example.planit_mobile.ui.screens.profile.UserProfileViewModel
 import com.example.planit_mobile.ui.screens.searchEvent.SearchEventScreen
 import com.example.planit_mobile.ui.screens.searchEvent.SearchEventViewModel
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -46,37 +47,29 @@ class HomeActivity : ComponentActivity() {
     }
 
     companion object {
-        fun navigateTo(origin: Activity, userID: Int? = null) {
-            val intent = Intent(origin, HomeActivity::class.java).apply {
-                putExtra("userID", userID)
-            }
+        fun navigateTo(origin: Activity) {
+            val intent = Intent(origin, HomeActivity::class.java)
             origin.startActivity(intent)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val userID = intent.getIntExtra("userID", 0)
 
         lifecycleScope.launch {
-            userViewModel.loadState.collect {
-                if (it is Idle) {
-                    if(userID != 0) {
-                        userViewModel.fetchUser(userID)
-                    }else {
-                        userViewModel.fetchUser()
-                    }
+            combine(userViewModel.loadState, userViewModel.logState) { loadState, logState ->
+                Pair(loadState, logState)
+            }.collect { (loadState, logState) ->
+                if (loadState is Idle) {
+                    userViewModel.fetchUser()
                 }
-            }
-            if(!homeViewModel.isLogged()){
-                GuestActivity.navigateTo(this@HomeActivity)
-            }
-            homeViewModel.logState.collect {
-                if (!it) {
+                if (!logState) {
                     GuestActivity.navigateTo(this@HomeActivity)
                 }
             }
         }
+
+
 
         setContent {
             PlanitMobileTheme {
@@ -85,24 +78,30 @@ class HomeActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     val homeTabState = homeViewModel.homeTabState.collectAsState(HomeTabState.HOME).value
+                    val errorMessage = userViewModel.errorState.collectAsState(initial = Error("")).value.message
                     when (homeTabState) {
                         HomeTabState.HOME -> {
                             HomeScreen(
-                                onLogoutRequested = { homeViewModel.logout() },
                                 onProfileRequested = { homeViewModel.setHomeTabState(HomeTabState.PROFILE) },
                                 onHomeRequested = { lifecycleScope.launch {homeViewModel.refreshData()} },
                                 onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) }
                             )
+                            ErrorPopup(
+                                showDialog = errorMessage != "",
+                                errorMessage = errorMessage) {
+                                userViewModel.dismissError()
+                            }
                         }
                         HomeTabState.PROFILE -> {
                             val state = userViewModel.loadState.collectAsState(initial = idle()).value.getOrNull()
-                            val errorMessage = userViewModel.errorState.collectAsState(initial = Error("")).value.message
                             if (state != null) {
                                 UserProfileScreen(
                                     userInfo = state,
                                     onProfileRequested = { lifecycleScope.launch {userViewModel.refreshData()} },
                                     onHomeRequested = { homeViewModel.setHomeTabState(HomeTabState.HOME) },
-                                    onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) }
+                                    onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) },
+                                    onLogoutRequested = { userViewModel.logout(); GuestActivity.navigateTo(this@HomeActivity) },
+                                    onEditProfileRequested = /* TODO */ {}
                                 )
                                 ErrorPopup(
                                     showDialog = errorMessage != "",
@@ -120,6 +119,11 @@ class HomeActivity : ComponentActivity() {
                                     eventViewModel.search(searchQuery)
                                 }
                             )
+                            ErrorPopup(
+                                showDialog = errorMessage != "",
+                                errorMessage = errorMessage) {
+                                userViewModel.dismissError()
+                            }
                         }
                     }
                 }

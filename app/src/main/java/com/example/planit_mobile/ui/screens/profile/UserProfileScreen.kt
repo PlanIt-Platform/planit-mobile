@@ -1,6 +1,5 @@
 package com.example.planit_mobile.ui.screens.profile
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,9 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -27,27 +36,61 @@ import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
-import com.example.planit_mobile.ui.screens.common.backArrow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
     userInfo: User,
     onProfileRequested: () -> Unit,
     onHomeRequested: () -> Unit,
     onEventsRequested: () -> Unit,
+    onLogoutRequested: () -> Unit,
+    onEditProfileRequested: () -> Unit
 ) {
+    val dropdownMenuExpanded = remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         bottomBar = {
-            BotBar(navigation =
-            NavigationHandlers(
-                onProfileRequested = onProfileRequested,
-                onHomeRequested = onHomeRequested,
-                onEventsRequested = onEventsRequested
-            )
+            BotBar(navigation = NavigationHandlers(
+                    onProfileRequested = onProfileRequested,
+                    onHomeRequested = onHomeRequested,
+                    onEventsRequested = onEventsRequested
+                )
             )
         },
+        containerColor = Color(240, 240, 240, 255),
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .background(color = Color(28, 185, 165, 255))
+                    .shadow(0.dp),
+                title = { Text("Profile") },
+                actions = {
+                    IconButton(onClick = { dropdownMenuExpanded.value = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                    }
+                    DropdownMenu(
+                        expanded = dropdownMenuExpanded.value,
+                        onDismissRequest = { dropdownMenuExpanded.value = false }
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            dropdownMenuExpanded.value = false
+                            onEditProfileRequested()
+                        }, text = {
+                            Text(text = "Edit Profile", fontSize = 16.sp)
+                        })
+                        DropdownMenuItem(onClick = {
+                            dropdownMenuExpanded.value = false
+                            onLogoutRequested()
+                        }, text = {
+                            Text(text = "Logout", fontSize = 16.sp)
+                        })
+                    }
+                }
+            )
+        }
     ) {
         UpperHalf(padding = it, userInfo = userInfo)
         MiddleSection(userInfo = userInfo)
@@ -61,7 +104,7 @@ fun UpperHalf(padding: PaddingValues, userInfo: User){
         modifier = Modifier
             .padding(padding)
             .height(275.dp)
-            .background(color = Color(28, 155, 139, 255))
+            .background(color = Color(28, 185, 165, 255))
     ) {
         Column(
             modifier = Modifier
@@ -182,9 +225,11 @@ fun PreviewUserProfileScreen() {
             "Daniel2003",
             "Im nice",
             "daniel@gmail.com",
-            listOf("Sports and Outdoor", "Culture", "Education", "Entertainment", /*"Volunteering"*/)),
+            listOf("Sports and Outdoor", "Culture", "Education", "Entertainment"/*, "Volunteering"*/)),
         onProfileRequested = {},
         onHomeRequested = {},
-        onEventsRequested = {}
+        onEventsRequested = {},
+        onLogoutRequested = {},
+        onEditProfileRequested = {}
     )
 }

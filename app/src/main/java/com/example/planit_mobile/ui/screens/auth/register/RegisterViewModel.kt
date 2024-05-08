@@ -56,7 +56,7 @@ class RegisterViewModel(
             request = { userAccessToken, userRefreshToken, userId ->
                 userService.editUser(userAccessToken, userRefreshToken, name, interests.split(","), description)
                       },
-            onSuccess = { _, _, _, _ ->
+            onSuccess = {
                 loadStateFlow.value = step3()
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },

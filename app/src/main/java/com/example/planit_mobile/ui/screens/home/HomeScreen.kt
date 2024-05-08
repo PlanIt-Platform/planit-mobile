@@ -9,21 +9,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
-import com.example.planit_mobile.ui.screens.profile.UserProfileScreen
 
 @Composable
 fun HomeScreen(
-    onLogoutRequested: () -> Unit,
     onProfileRequested: () -> Unit,
     onHomeRequested: () -> Unit,
     onEventsRequested: () -> Unit,
@@ -42,16 +37,14 @@ fun HomeScreen(
         },
     ) {
         BackgroundBox(
-            it,
-            onLogoutRequested
+            it
         )
     }
 }
 
 @Composable
 fun BackgroundBox(
-    it: PaddingValues,
-    onLogoutRequested: () -> Unit,
+    it: PaddingValues
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -68,12 +61,6 @@ fun BackgroundBox(
             Row {
 
             }
-            Column {
-                Button(
-                    onClick =  onLogoutRequested,
-                    content = { Text("Logout") },
-                )
-            }
         }
     }
 }
@@ -83,7 +70,6 @@ fun BackgroundBox(
 @Composable
 fun PreviewUserProfileScreen() {
     HomeScreen(
-        onLogoutRequested = {},
         onProfileRequested = {},
         onHomeRequested = {},
         onEventsRequested = {},

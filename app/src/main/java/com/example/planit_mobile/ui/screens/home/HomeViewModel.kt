@@ -23,34 +23,10 @@ class HomeViewModel(
         }
     }
 
-    private val logStateFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
-
-    suspend fun isLogged() : Boolean {
-        val isLoggedIn = kotlin.runCatching { sessionStorage.isLogged() }.getOrNull()
-        return isLoggedIn ?: false
-    }
-
     fun refreshData() {
         viewModelScope.launch {
-            logStateFlow.value = sessionStorage.isLogged()
+
         }
-    }
-
-    val logState: Flow<Boolean>
-        get() = logStateFlow.asStateFlow()
-
-    fun logout() {
-        viewModelScope.launch { sessionStorage.clearSession() }
-        launchAndAuthenticateRequest(
-            request = { userAccessToken, userRefreshToken, _ ->
-                service.logout(userAccessToken, userRefreshToken)
-            },
-            onSuccess = { _, _, _, _ ->
-                logStateFlow.value = false
-            },
-            onFailure = {},
-            sessionStorage = sessionStorage
-        )
     }
 
     private val _homeTabState = MutableStateFlow(HomeTabState.HOME)

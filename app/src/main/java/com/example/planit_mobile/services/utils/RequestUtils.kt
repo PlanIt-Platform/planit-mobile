@@ -33,7 +33,7 @@ fun <T> ViewModel.launchAndRequest(
 
 fun <T> ViewModel.launchAndAuthenticateRequest(
     request: suspend (accessToken: String, refreshToken: String, userId: Int) -> T,
-    onSuccess: suspend (T, accessToken: String, refreshToken: String, userID: Int) -> Unit = { _, _, _, _ -> },
+    onSuccess: suspend (T) -> Unit,
     onFailure: suspend (Throwable) -> Unit,
     sessionStorage: SessionDataStore
 ) {
@@ -45,12 +45,12 @@ fun <T> ViewModel.launchAndAuthenticateRequest(
         if (userAccessToken == null || userRefreshToken == null  || userID == null) {
             return@launch
         }
-        val result = request(userAccessToken, userRefreshToken, userID)
-        executeRequest(
-            request = { result },
-            onSuccess = { onSuccess(result, userAccessToken, userRefreshToken, userID) },
+        val ex = executeRequest(
+            request = { request(userAccessToken, userRefreshToken, userID) },
+            onSuccess = onSuccess,
             onFailure = onFailure
         )
+        return@launch ex
     }
 }
 

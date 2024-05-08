@@ -1,6 +1,7 @@
 package com.example.planit_mobile.ui.screens.profile
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
@@ -18,6 +19,7 @@ import com.example.planit_mobile.ui.screens.common.loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class UserProfileViewModel(
     private val service: UserService,
@@ -32,6 +34,10 @@ class UserProfileViewModel(
 
     private val loadStateFlow : MutableStateFlow<LoadState<User>> = MutableStateFlow(idle())
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
+    private val logStateFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
+
+    val logState: Flow<Boolean>
+        get() = logStateFlow.asStateFlow()
 
     val loadState: Flow<LoadState<User>>
         get() = loadStateFlow.asStateFlow()
@@ -45,10 +51,28 @@ class UserProfileViewModel(
             request = { userAccessToken, userRefreshToken, _ ->
                 service.fetchUserInfo(id ?: userId, userAccessToken, userRefreshToken)
             },
-            onSuccess = { res, _, _, _ ->
-                loadStateFlow.value = loaded(res)
+            onSuccess = {
+                loadStateFlow.value = loaded(it)
             },
-            onFailure = {errorStateFlow.value = errorMessage(it.message.toString()) },
+            onFailure = {
+                errorStateFlow.value = errorMessage(it.message.toString())
+                logStateFlow.value = false
+                viewModelScope.launch { sessionStorage.clearSession() }
+            },
+            sessionStorage = sessionStorage
+        )
+    }
+
+    fun logout() {
+        launchAndAuthenticateRequest(
+            request = { userAccessToken, userRefreshToken, _ ->
+                service.logout(userAccessToken, userRefreshToken)
+            },
+            onSuccess = {
+                logStateFlow.value = false
+                viewModelScope.launch { sessionStorage.clearSession() }
+            },
+            onFailure = {},
             sessionStorage = sessionStorage
         )
     }
