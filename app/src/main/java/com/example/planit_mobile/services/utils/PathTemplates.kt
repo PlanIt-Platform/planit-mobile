@@ -17,4 +17,5 @@ object PathTemplates {
     const val CREATE_EVENT = "${PLANIT_API_URL}/event"
     const val GET_EVENT = "${PLANIT_API_URL}/event/{id}"
     const val USERS_IN_EVENT = "${PLANIT_API_URL}/event/{id}/users"
+    const val GET_CATEGORIES = "${PLANIT_API_URL}/event/categories"
 }

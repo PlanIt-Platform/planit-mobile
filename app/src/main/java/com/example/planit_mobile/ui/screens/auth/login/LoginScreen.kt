@@ -5,12 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.ui.screens.common.TextField
 import com.example.planit_mobile.ui.screens.common.Title
-import com.example.planit_mobile.ui.screens.common.backArrow
+import com.example.planit_mobile.ui.screens.common.BackArrow
 
 
 @Composable
@@ -36,7 +33,7 @@ fun LoginScreen(
     var emailOrName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Box( modifier = Modifier.fillMaxSize() ){
-        backArrow (Color.White){ onBackRequested() }
+        BackArrow (Color.White){ onBackRequested() }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier

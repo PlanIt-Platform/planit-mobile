@@ -17,8 +17,11 @@ import com.example.planit_mobile.ui.screens.auth.guest.GuestActivity
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.ErrorPopup
 import com.example.planit_mobile.ui.screens.common.Idle
+import com.example.planit_mobile.ui.screens.common.Loading
+import com.example.planit_mobile.ui.screens.common.LoadingScreen
 import com.example.planit_mobile.ui.screens.common.getOrNull
 import com.example.planit_mobile.ui.screens.common.idle
+import com.example.planit_mobile.ui.screens.profile.EditUserProfileActivity
 import com.example.planit_mobile.ui.screens.profile.UserProfileScreen
 import com.example.planit_mobile.ui.screens.profile.UserProfileViewModel
 import com.example.planit_mobile.ui.screens.searchEvent.SearchEventScreen
@@ -77,44 +80,87 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val homeTabState = homeViewModel.homeTabState.collectAsState(HomeTabState.HOME).value
-                    val errorMessage = userViewModel.errorState.collectAsState(initial = Error("")).value.message
+                    val homeTabState =
+                        homeViewModel.homeTabState.collectAsState(initial = HomeTabState.HOME).value
+                    val errorMessage =
+                        userViewModel.errorState.collectAsState(initial = Error("")).value.message
+                    val userState = userViewModel.loadState.collectAsState(initial = idle()).value
+                    val logState = userViewModel.logState.collectAsState(initial = false).value
+
                     when (homeTabState) {
+
                         HomeTabState.HOME -> {
-                            HomeScreen(
-                                onProfileRequested = { homeViewModel.setHomeTabState(HomeTabState.PROFILE) },
-                                onHomeRequested = { lifecycleScope.launch {homeViewModel.refreshData()} },
-                                onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) }
-                            )
-                            ErrorPopup(
-                                showDialog = errorMessage != "",
-                                errorMessage = errorMessage) {
-                                userViewModel.dismissError()
-                            }
-                        }
-                        HomeTabState.PROFILE -> {
-                            val state = userViewModel.loadState.collectAsState(initial = idle()).value.getOrNull()
-                            if (state != null) {
-                                UserProfileScreen(
-                                    userInfo = state,
-                                    onProfileRequested = { lifecycleScope.launch {userViewModel.refreshData()} },
-                                    onHomeRequested = { homeViewModel.setHomeTabState(HomeTabState.HOME) },
-                                    onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) },
-                                    onLogoutRequested = { userViewModel.logout(); GuestActivity.navigateTo(this@HomeActivity) },
-                                    onEditProfileRequested = /* TODO */ {}
+                            if (userState is Loading) {
+                                LoadingScreen {
+                                    navigateTo(this@HomeActivity)
+                                }
+                            } else {
+                                HomeScreen(
+                                    onProfileRequested = { homeViewModel.setHomeTabState(HomeTabState.PROFILE) },
+                                    onHomeRequested = { lifecycleScope.launch {homeViewModel.refreshData()} },
+                                    onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) }
                                 )
-                                ErrorPopup(
-                                    showDialog = errorMessage != "",
-                                    errorMessage = errorMessage) {
-                                    userViewModel.dismissError()
+                                if (logState) {
+                                    ErrorPopup(
+                                        showDialog = errorMessage != "",
+                                        errorMessage = errorMessage
+                                    ) {
+                                        userViewModel.dismissError()
+                                    }
                                 }
                             }
                         }
+
+                        HomeTabState.PROFILE -> {
+                            val state = userViewModel.loadState.collectAsState(initial = idle())
+                                .value.getOrNull()
+                            if (state != null) {
+                                if (userState is Loading) {
+                                    LoadingScreen {
+                                        navigateTo(this@HomeActivity)
+                                    }
+                                } else {
+                                    UserProfileScreen(
+                                        userInfo = state,
+                                        onProfileRequested = {
+                                            lifecycleScope.launch { userViewModel.refreshData() }
+                                        },
+                                        onHomeRequested = {
+                                            homeViewModel.setHomeTabState(HomeTabState.HOME)
+                                        },
+                                        onEventsRequested = {
+                                            lifecycleScope.launch { eventViewModel.refreshData() }
+                                        },
+                                        onLogoutRequested = {
+                                            userViewModel.setLoadingState()
+                                            userViewModel.logout()
+                                            GuestActivity.navigateTo(this@HomeActivity)
+                                        },
+                                        onEditProfileRequested = {
+                                            EditUserProfileActivity.navigateTo(this@HomeActivity)
+                                        }
+                                    )
+                                    ErrorPopup(
+                                        showDialog = errorMessage != "",
+                                        errorMessage = errorMessage
+                                    ) {
+                                        userViewModel.dismissError()
+                                    }
+                                }
+                            }
+                        }
+
                         HomeTabState.EVENTS -> {
                             SearchEventScreen(
-                                onProfileRequested = { homeViewModel.setHomeTabState(HomeTabState.PROFILE) },
-                                onHomeRequested = { homeViewModel.setHomeTabState(HomeTabState.HOME) },
-                                onEventsRequested = { lifecycleScope.launch {eventViewModel.refreshData()} },
+                                onProfileRequested = {
+                                    homeViewModel.setHomeTabState(HomeTabState.PROFILE)
+                                },
+                                onHomeRequested = {
+                                    homeViewModel.setHomeTabState(HomeTabState.HOME)
+                                },
+                                onEventsRequested = {
+                                    lifecycleScope.launch {eventViewModel.refreshData()}
+                                },
                                 onSearch = { searchQuery ->
                                     eventViewModel.search(searchQuery)
                                 }
@@ -125,6 +171,7 @@ class HomeActivity : ComponentActivity() {
                                 userViewModel.dismissError()
                             }
                         }
+
                     }
                 }
             }

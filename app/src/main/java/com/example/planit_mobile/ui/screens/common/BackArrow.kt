@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun backArrow(
+fun BackArrow(
     color: Color = Color.Black,
     onBackRequested: () -> Unit
 ) {

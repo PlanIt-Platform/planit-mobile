@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
@@ -14,8 +13,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,28 +27,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.ui.screens.common.Title
 import com.example.planit_mobile.ui.screens.common.TextField
-import com.example.planit_mobile.ui.screens.common.backArrow
+import com.example.planit_mobile.ui.screens.common.BackArrow
 
 
 @Composable
 fun RegisterScreen(
     onRegister: (String, String, String, String) -> Unit,
-    onEdit: (String, String, String) -> Unit,
+    onEdit: (String, List<String>, String) -> Unit,
     onBackRequested: () -> Unit,
-    showError: Boolean
+    showError: Boolean,
+    categories: List<String>
 ) {
     var steps by remember { mutableStateOf<RegisterState>(Step1State) }
     var userInfo by remember { mutableStateOf(
-        UserInfo(0, "", "", "", "", "", ""))
+        UserInfo(0, "", "", "", "", "", listOf()))
     }
     if (showError) steps = Step1State
     Box( modifier = Modifier.fillMaxSize() ){
-        backArrow (Color.White) { onBackRequested() }
+        BackArrow (Color.White) { onBackRequested() }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 200.dp),
+                .padding(top = 100.dp),
         ) {
             when (steps) {
                 Step1State -> {
@@ -64,15 +62,15 @@ fun RegisterScreen(
                 }
 
                 Step2State -> {
-                    Step2(setInterests = { newInterest ->
-                        userInfo = userInfo.copy(
-                            interests = if (userInfo.interests.isEmpty()) {
-                                newInterest
-                            } else {
-                                "${userInfo.interests}, $newInterest"
-                            }
-                        )
-                    }, setStep = { steps = it })
+                    Step2(
+                        setInterests = { newInterest ->
+                            userInfo = userInfo.copy(
+                                interests = userInfo.interests + newInterest
+                            )
+                        },
+                        setStep = { steps = it },
+                        categories = categories
+                    )
                 }
 
                 Step3State -> {
@@ -142,8 +140,12 @@ fun Step1(
 }
 
 @Composable
-fun Step2(setInterests: (String) -> Unit, setStep: (RegisterState) -> Unit) {
-    val interests = listOf("Sports and Outdoor", "Culture", "Education", "Entertainment", "Charity")
+fun Step2(
+    setInterests: (String) -> Unit,
+    setStep: (RegisterState) -> Unit,
+    categories: List<String>
+) {
+    val interests = categories.filter { it != "Simple Meeting" }
     Title(text = "What are you interested in?", Color.White, 30.sp)
     Column {
         for (interest in interests) {
@@ -177,7 +179,7 @@ fun Step2(setInterests: (String) -> Unit, setStep: (RegisterState) -> Unit) {
 fun Step3(
     userInfo: UserInfo,
     setDescription: (String) -> Unit,
-    onEdit: (String, String, String) -> Unit
+    onEdit: (String, List<String>, String) -> Unit
 ) {
     Title(text = "Almost there!", Color.White, 30.sp)
     TextField(

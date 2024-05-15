@@ -43,4 +43,10 @@ interface EventService {
      */
 
     suspend fun getUsersInEvent(eventID: Int)
+
+    /**
+     * Retrieves the categories of events available in the application.
+     * @return The categories of events available in the application.
+     */
+    suspend fun getCategories(): List<String>
 }

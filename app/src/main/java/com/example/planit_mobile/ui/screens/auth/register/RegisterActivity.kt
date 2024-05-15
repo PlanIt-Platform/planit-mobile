@@ -28,7 +28,7 @@ class RegisterActivity : ComponentActivity() {
     private val dependencies by lazy { application as PlanItDependencyProvider }
 
     private val viewModel by viewModels<RegisterViewModel> {
-        RegisterViewModel.factory(dependencies.userService, dependencies.sessionStorage)
+        RegisterViewModel.factory(dependencies.userService, dependencies.eventService, dependencies.sessionStorage)
     }
 
     companion object {
@@ -49,6 +49,8 @@ class RegisterActivity : ComponentActivity() {
         }
 
         setContent {
+            viewModel.getCategories()
+            val categories = viewModel.categoriesState.collectAsState(initial = emptyList()).value
             val errorMessage = viewModel.errorState.collectAsState(initial = Error("")).value.message
             PlanitMobileTheme {
                 Surface(
@@ -63,7 +65,8 @@ class RegisterActivity : ComponentActivity() {
                             viewModel.editUser(name, interests, description)
                         },
                         onBackRequested = { finish() },
-                        showError = errorMessage != ""
+                        showError = errorMessage != "",
+                        categories = categories
                     )
                     ErrorPopup(
                         showDialog = errorMessage != "",

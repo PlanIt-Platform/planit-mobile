@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,11 +63,17 @@ fun UserProfileScreen(
             )
         },
         containerColor = Color(240, 240, 240, 255),
-        topBar = {
+    ) {
+        Box(modifier = Modifier.fillMaxSize()){
+            UpperHalf(padding = it, userInfo = userInfo)
+            MiddleSection(userInfo = userInfo)
+            LowerHalf(userInfo = userInfo)
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                ),
                 modifier = Modifier
-                    .background(color = Color(28, 185, 165, 255))
-                    .shadow(0.dp),
+                    .offset(y = 0.dp),
                 title = { Text("Profile") },
                 actions = {
                     IconButton(onClick = { dropdownMenuExpanded.value = true }) {
@@ -91,10 +99,6 @@ fun UserProfileScreen(
                 }
             )
         }
-    ) {
-        UpperHalf(padding = it, userInfo = userInfo)
-        MiddleSection(userInfo = userInfo)
-        LowerHalf(userInfo = userInfo)
     }
 }
 

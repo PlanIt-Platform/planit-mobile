@@ -7,5 +7,5 @@ data class UserInfo(
     val password: String,
     val description: String,
     val email: String,
-    val interests: String
+    val interests: List<String>
 )

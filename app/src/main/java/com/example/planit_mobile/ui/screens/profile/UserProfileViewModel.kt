@@ -57,10 +57,15 @@ class UserProfileViewModel(
             onFailure = {
                 errorStateFlow.value = errorMessage(it.message.toString())
                 logStateFlow.value = false
+                loadStateFlow.value = idle()
                 viewModelScope.launch { sessionStorage.clearSession() }
             },
             sessionStorage = sessionStorage
         )
+    }
+
+    fun setLoadingState() {
+        loadStateFlow.value = loading()
     }
 
     fun logout() {

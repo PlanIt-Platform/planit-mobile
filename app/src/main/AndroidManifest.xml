@@ -38,10 +38,7 @@
             android:name=".ui.screens.home.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.screens.profile.UserProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.screens.searchEvent.SearchEventActivity"
+            android:name=".ui.screens.profile.EditUserProfileActivity"
             android:exported="false" />
     </application>
 
