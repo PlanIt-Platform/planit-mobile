@@ -38,7 +38,7 @@ class HomeActivity : ComponentActivity() {
     private val dependencies by lazy { application as PlanItDependencyProvider }
 
     private val homeViewModel by viewModels<HomeViewModel> {
-        HomeViewModel.factory(dependencies.userService, dependencies.sessionStorage)
+        HomeViewModel.factory(dependencies.userService, dependencies.eventService, dependencies.sessionStorage)
     }
 
     private val userViewModel by viewModels<UserProfileViewModel> {
@@ -80,12 +80,23 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
+                    homeViewModel.getCategories()
                     val homeTabState =
                         homeViewModel.homeTabState.collectAsState(initial = HomeTabState.HOME).value
-                    val errorMessage =
+                    val userErrorMessage =
                         userViewModel.errorState.collectAsState(initial = Error("")).value.message
                     val userState = userViewModel.loadState.collectAsState(initial = idle()).value
                     val logState = userViewModel.logState.collectAsState(initial = false).value
+                    val homeErrorMessage =
+                        homeViewModel.errorState.collectAsState(initial = Error("")).value.message
+                    val eventCreatedState =
+                        homeViewModel.eventCreatedState.collectAsState(initial = false).value
+                    val eventCreatedMessage =
+                        homeViewModel.eventCreatedMessageState.collectAsState(initial = "").value
+                    val categories =
+                        homeViewModel.categoriesState.collectAsState(initial = emptyList()).value
+                    val subcategories =
+                        homeViewModel.subcategoriesState.collectAsState(initial = emptyList()).value
 
                     when (homeTabState) {
 
@@ -96,14 +107,46 @@ class HomeActivity : ComponentActivity() {
                                 }
                             } else {
                                 HomeScreen(
-                                    onProfileRequested = { homeViewModel.setHomeTabState(HomeTabState.PROFILE) },
+                                    onProfileRequested = {
+                                        lifecycleScope.launch { userViewModel.refreshData() }
+                                        homeViewModel.setHomeTabState(HomeTabState.PROFILE)
+                                    },
                                     onHomeRequested = { lifecycleScope.launch {homeViewModel.refreshData()} },
-                                    onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) }
+                                    onEventsRequested = { homeViewModel.setHomeTabState(HomeTabState.EVENTS) },
+                                    categories = categories,
+                                    onCategorySelected = { category ->
+                                        homeViewModel.getSubcategories(category)
+                                    },
+                                    subCategories = subcategories,
+                                    createEventRequested = { title, description, category,
+                                                             subcategory, location, visibility, date,
+                                                             endDate, price, password ->
+                                        homeViewModel.createEvent(
+                                            title,
+                                            description,
+                                            category,
+                                            subcategory,
+                                            location,
+                                            visibility,
+                                            date,
+                                            endDate,
+                                            price,
+                                            password
+                                        )
+                                    },
+                                    eventCreatedPopUp = eventCreatedState,
+                                    eventCreatedMessage = eventCreatedMessage
                                 )
+                                ErrorPopup(
+                                    showDialog = homeErrorMessage != "",
+                                    errorMessage = homeErrorMessage
+                                ) {
+                                    homeViewModel.dismissError()
+                                }
                                 if (logState) {
                                     ErrorPopup(
-                                        showDialog = errorMessage != "",
-                                        errorMessage = errorMessage
+                                        showDialog = userErrorMessage != "",
+                                        errorMessage = userErrorMessage
                                     ) {
                                         userViewModel.dismissError()
                                     }
@@ -129,7 +172,7 @@ class HomeActivity : ComponentActivity() {
                                             homeViewModel.setHomeTabState(HomeTabState.HOME)
                                         },
                                         onEventsRequested = {
-                                            lifecycleScope.launch { eventViewModel.refreshData() }
+                                            homeViewModel.setHomeTabState(HomeTabState.EVENTS)
                                         },
                                         onLogoutRequested = {
                                             userViewModel.setLoadingState()
@@ -141,8 +184,8 @@ class HomeActivity : ComponentActivity() {
                                         }
                                     )
                                     ErrorPopup(
-                                        showDialog = errorMessage != "",
-                                        errorMessage = errorMessage
+                                        showDialog = userErrorMessage != "",
+                                        errorMessage = userErrorMessage
                                     ) {
                                         userViewModel.dismissError()
                                     }
@@ -166,8 +209,8 @@ class HomeActivity : ComponentActivity() {
                                 }
                             )
                             ErrorPopup(
-                                showDialog = errorMessage != "",
-                                errorMessage = errorMessage) {
+                                showDialog = userErrorMessage != "",
+                                errorMessage = userErrorMessage) {
                                 userViewModel.dismissError()
                             }
                         }

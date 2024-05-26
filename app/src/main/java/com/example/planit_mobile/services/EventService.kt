@@ -1,5 +1,8 @@
 package com.example.planit_mobile.services
 
+import com.example.planit_mobile.services.models.CreateEventInputModel
+import com.example.planit_mobile.services.models.CreateEventOutputModel
+
 interface EventService {
 
     /**
@@ -17,17 +20,19 @@ interface EventService {
      * @return containing the ID of the newly created event, its title and a status message.
      */
     suspend fun createEvent(
+        userAccessToken: String,
+        userRefreshToken: String,
         title: String,
         description: String?,
         category: String,
-        subcategory: String?,
+        subcategory: String,
         location: String?,
         visibility: String?,
-        date: String?,
+        date: String,
         endDate: String?,
-        price: String?,
-        userID: Int
-    )
+        price: String,
+        password: String
+    ) : CreateEventOutputModel
 
     /**
      * Retrieves the event associated with the given ID.
@@ -49,4 +54,10 @@ interface EventService {
      * @return The categories of events available in the application.
      */
     suspend fun getCategories(): List<String>
+
+    /**
+     * Retrieves the subcategories of events available in the application.
+     * @return The subcategories of events available in the application.
+     */
+    suspend fun getSubcategories(category: String): List<String>
 }

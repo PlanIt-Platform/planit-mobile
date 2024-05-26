@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,7 +75,7 @@ fun UserProfileScreen(
                 ),
                 modifier = Modifier
                     .offset(y = 0.dp),
-                title = { Text("Profile") },
+                title = { Text("Profile", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = { dropdownMenuExpanded.value = true }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "More options")
@@ -172,7 +173,7 @@ fun LowerHalf(userInfo: User){
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp, 10.dp, 0.dp, 0.dp),
+                .padding(0.dp, 10.dp, 0.dp, 20.dp),
             verticalArrangement = Arrangement.Top,
         ) {
             Text(

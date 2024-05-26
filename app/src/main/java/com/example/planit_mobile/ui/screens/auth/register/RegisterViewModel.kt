@@ -60,7 +60,7 @@ class RegisterViewModel(
         launchAndAuthenticateRequest(
             request = { userAccessToken, userRefreshToken, userId ->
                 userService.editUser(userAccessToken, userRefreshToken, name, interests, description)
-                      },
+            },
             onSuccess = {
                 loadStateFlow.value = step3()
             },

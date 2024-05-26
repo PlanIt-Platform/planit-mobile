@@ -64,9 +64,15 @@ fun RegisterScreen(
                 Step2State -> {
                     Step2(
                         setInterests = { newInterest ->
-                            userInfo = userInfo.copy(
-                                interests = userInfo.interests + newInterest
-                            )
+                            userInfo = if (newInterest in userInfo.interests) {
+                                userInfo.copy(
+                                    interests = userInfo.interests.filter { it != newInterest }
+                                )
+                            } else {
+                                userInfo.copy(
+                                    interests = userInfo.interests + newInterest
+                                )
+                            }
                         },
                         setStep = { steps = it },
                         categories = categories

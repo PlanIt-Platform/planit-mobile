@@ -1,9 +1,11 @@
 package com.example.planit_mobile.ui.screens.profile
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
+import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.services.EventService
 import com.example.planit_mobile.services.UserService
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.loaded
+import com.example.planit_mobile.ui.screens.common.loading
+import kotlinx.coroutines.launch
 
 
 class EditUserProfileViewModel (
@@ -30,24 +34,54 @@ class EditUserProfileViewModel (
         }
     }
 
-    private val loadStateFlow : MutableStateFlow<LoadState<Int>> = MutableStateFlow(idle())
+    private val loadStateFlow : MutableStateFlow<LoadState<Any>> = MutableStateFlow(idle())
+    private val userInfoFlow : MutableStateFlow<User> = MutableStateFlow(
+        User(0, "", "", "", "", emptyList())
+    )
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
     private val categoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    private val logStateFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
-    val categoriesState: Flow<List<String>>
-        get() = categoriesFlow.asStateFlow()
-    val loadState: Flow<LoadState<Int>>
+    val loadState: Flow<LoadState<Any>>
         get() = loadStateFlow.asStateFlow()
+    val userInfo: Flow<User>
+        get() = userInfoFlow.asStateFlow()
     val errorState: Flow<Error>
         get() = errorStateFlow.asStateFlow()
+    val categoriesState: Flow<List<String>>
+        get() = categoriesFlow.asStateFlow()
+    val logState: Flow<Boolean>
+        get() = logStateFlow.asStateFlow()
 
-    fun editUser(name: String, interests: String, description: String) {
+
+    suspend fun fetchUser(id: Int? = null) {
+        loadStateFlow.value = loading()
+        val userId = sessionStorage.getUserID() ?: return
         launchAndAuthenticateRequest(
-            request = { userAccessToken, userRefreshToken, userId ->
-                userService.editUser(userAccessToken, userRefreshToken, name, interests.split(","), description)
+            request = { userAccessToken, userRefreshToken, _ ->
+                userService.fetchUserInfo(id ?: userId, userAccessToken, userRefreshToken)
             },
             onSuccess = {
-                loadStateFlow.value = loaded(1)
+                userInfoFlow.value = it
+            },
+            onFailure = {
+                errorStateFlow.value = errorMessage(it.message.toString())
+                loadStateFlow.value = idle()
+                viewModelScope.launch { sessionStorage.clearSession() }
+                logStateFlow.value = false
+            },
+            sessionStorage = sessionStorage
+        )
+    }
+
+    fun editUser(name: String, interests: List<String>, description: String) {
+        loadStateFlow.value = loading()
+        launchAndAuthenticateRequest(
+            request = { userAccessToken, userRefreshToken, userId ->
+                userService.editUser(userAccessToken, userRefreshToken, name, interests, description)
+            },
+            onSuccess = {
+                loadStateFlow.value = loaded(true)
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
             sessionStorage = sessionStorage

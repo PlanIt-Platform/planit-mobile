@@ -15,7 +15,16 @@ object PathTemplates {
      * Event paths
      */
     const val CREATE_EVENT = "${PLANIT_API_URL}/event"
-    const val GET_EVENT = "${PLANIT_API_URL}/event/{id}"
+    private const val GET_EVENT = "${PLANIT_API_URL}/event/{id}"
     const val USERS_IN_EVENT = "${PLANIT_API_URL}/event/{id}/users"
     const val GET_CATEGORIES = "${PLANIT_API_URL}/event/categories"
+    private const val GET_SUBCATEGORIES = "${PLANIT_API_URL}/event/categories/{category}/subcategories"
+
+    fun getEventPath(id: String): String {
+        return GET_EVENT.replace("{id}", id)
+    }
+
+    fun getSubcategoriesPath(category: String): String {
+        return GET_SUBCATEGORIES.replace("{category}", category)
+    }
 }
