@@ -1,6 +1,7 @@
 package com.example.planit_mobile.ui.screens.home
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,25 +19,25 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.planit_mobile.services.models.SearchEventResult
+import com.example.planit_mobile.services.models.UserEventsResult
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
-import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
@@ -51,12 +52,12 @@ fun HomeScreen(
         String, String, String, String, String, String, String, String, String, String
     ) -> Unit,
     eventCreatedPopUp : Boolean,
-    eventCreatedMessage : String
+    eventCreatedMessage : String,
+    userEvents: UserEventsResult?,
+    onEventClick: (SearchEventResult) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier
@@ -85,11 +86,13 @@ fun HomeScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        var eventName by remember { mutableStateOf("") }
-        var eventDescription by remember { mutableStateOf("") }
 
         BackgroundBox(
-            it
+            it,
+            userEvents = userEvents,
+            onEventClick = { event ->
+                onEventClick(event)
+            }
         )
 
         // Create Event Dialog
@@ -103,11 +106,7 @@ fun HomeScreen(
                         .background(Color(39, 62, 73, 255))
                 ) {
                     CreateEventPopup (
-                        lastName = eventName,
-                        lastDescription = eventDescription,
                         onDismiss = { action -> showDialog = action },
-                        saveLastName = { name -> eventName = name },
-                        saveLastDescription = { description -> eventDescription = description },
                         categories = categories,
                         onCategorySelected = onCategorySelected,
                         subCategories = subCategories,
@@ -120,12 +119,7 @@ fun HomeScreen(
 
         // Event Created Popup
         if (eventCreatedPopUp) {
-            coroutineScope.launch{
-                snackbarHostState.showSnackbar(
-                    message = eventCreatedMessage,
-                    duration = SnackbarDuration.Short
-                )
-            }
+            Toast.makeText(LocalContext.current, eventCreatedMessage, Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -133,7 +127,9 @@ fun HomeScreen(
 
 @Composable
 fun BackgroundBox(
-    it: PaddingValues
+    it: PaddingValues,
+    userEvents: UserEventsResult?,
+    onEventClick: (SearchEventResult) -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -144,11 +140,15 @@ fun BackgroundBox(
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .padding(it),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row {
-
+                UserEventsDisplay(
+                    userEvents = userEvents,
+                    onEventClick = { event ->
+                        onEventClick(event)
+                    }
+                )
             }
         }
     }
@@ -166,6 +166,12 @@ fun PreviewUserProfileScreen() {
         subCategories = listOf("Relaxed", "Serious", "Casual"),
         createEventRequested = { _, _, _, _, _, _, _, _, _, _ -> },
         eventCreatedPopUp = false,
-        eventCreatedMessage = ""
+        eventCreatedMessage = "",
+        userEvents = UserEventsResult(
+            1,
+            "username",
+            listOf()
+        ),
+        onEventClick = {}
     )
 }

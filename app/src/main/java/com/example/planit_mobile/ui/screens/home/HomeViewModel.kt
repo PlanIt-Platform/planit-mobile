@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
 import com.example.planit_mobile.services.EventService
 import com.example.planit_mobile.services.UserService
+import com.example.planit_mobile.services.models.UserEventsResult
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
 import com.example.planit_mobile.services.utils.launchAndRequest
 import com.example.planit_mobile.ui.screens.common.Error
@@ -35,6 +36,7 @@ class HomeViewModel(
     private val subcategoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     private val eventCreated = MutableStateFlow(false)
     private val eventCreatedMessage = MutableStateFlow("")
+    private val userEvents: MutableStateFlow<UserEventsResult?> = MutableStateFlow(null)
 
     val categoriesState: Flow<List<String>>
         get() = categoriesFlow.asStateFlow()
@@ -46,6 +48,8 @@ class HomeViewModel(
         get() = eventCreated.asStateFlow()
     val eventCreatedMessageState: Flow<String>
         get() = eventCreatedMessage.asStateFlow()
+    val userEventsState: Flow<UserEventsResult?>
+        get() = userEvents.asStateFlow()
 
     fun getCategories() {
         launchAndRequest(
@@ -106,16 +110,28 @@ class HomeViewModel(
                 eventCreatedMessage.value = "$eventTitle with ID $id: $status"
                 showEventCreated()
             },
-            onFailure = { errorStateFlow.value = errorMessage(it.message.toString())
-                Log.d("Create Event error", it.message.toString()) },
+            onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
+            sessionStorage = sessionStorage
+        )
+    }
+
+    fun getUserEvents() {
+        launchAndAuthenticateRequest(
+            request = { userAccessToken, userRefreshToken, _ ->
+                service.getUserEvents(userAccessToken, userRefreshToken)
+            },
+            onSuccess = {
+                userEvents.value = it
+            },
+            onFailure = {
+                errorStateFlow.value = errorMessage(it.message.toString())
+            },
             sessionStorage = sessionStorage
         )
     }
 
     fun refreshData() {
-        viewModelScope.launch {
-
-        }
+        getUserEvents()
     }
 
     fun dismissError() {

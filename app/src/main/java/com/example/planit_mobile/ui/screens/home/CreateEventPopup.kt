@@ -51,11 +51,7 @@ import java.util.Locale
 
 @Composable
 fun CreateEventPopup(
-    lastName: String,
-    lastDescription: String,
     onDismiss: (Boolean) -> Unit,
-    saveLastName: (String) -> Unit,
-    saveLastDescription: (String) -> Unit,
     categories: List<String>,
     onCategorySelected: (String) -> Unit,
     subCategories: List<String>,
@@ -150,8 +146,11 @@ fun CreateEventPopup(
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                 time = sdf.parse(startDateTime)!!
             }
-            if (!selectedEndDate.after(startDate)) {
+            if (selectedEndDate.get(Calendar.DAY_OF_YEAR) < startDate.get(Calendar.DAY_OF_YEAR) ||
+                selectedEndDate.get(Calendar.YEAR) < startDate.get(Calendar.YEAR)
+            ){
                 Toast.makeText(context, "End date must be after start date", Toast.LENGTH_SHORT).show()
+                endDateTime = ""
             } else {
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.MONTH, month)
@@ -164,10 +163,17 @@ fun CreateEventPopup(
                             set(Calendar.HOUR_OF_DAY, hourOfDay)
                             set(Calendar.MINUTE, minute)
                         }
-                        if (selectedEndDate.get(Calendar.DAY_OF_YEAR) == startDate.get(Calendar.DAY_OF_YEAR) &&
+                        val startDateHourMinute = Calendar.getInstance().apply {
+                            set(Calendar.HOUR_OF_DAY, startDate.get(Calendar.HOUR_OF_DAY))
+                            set(Calendar.MINUTE, startDate.get(Calendar.MINUTE))
+                        }
+                        if (
+                            (selectedEndDate.get(Calendar.DAY_OF_YEAR) == startDate.get(Calendar.DAY_OF_YEAR) &&
                             selectedEndDate.get(Calendar.YEAR) == startDate.get(Calendar.YEAR) &&
-                            selectedTime.before(startDate)) {
+                            selectedTime.timeInMillis <= startDateHourMinute.timeInMillis)
+                        ) {
                             Toast.makeText(context, "End date must be after start date", Toast.LENGTH_SHORT).show()
+                            endDateTime = ""
                         } else {
                             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                             calendar.set(Calendar.MINUTE, minute)
@@ -220,8 +226,8 @@ fun CreateEventPopup(
             // Event Name Field
             SectionBox {
                 TextField(
-                    value = lastName,
-                    onValueChange = { eventName = it; saveLastName(it) },
+                    value = eventName,
+                    onValueChange = { eventName = it },
                     label = { Text("Event Name *") },
                     modifier = Modifier
                         .padding(2.dp)
@@ -236,8 +242,8 @@ fun CreateEventPopup(
             // Event Description Field
             SectionBox {
                 TextField(
-                    value = lastDescription,
-                    onValueChange = { eventDescription = it; saveLastDescription(it) },
+                    value = eventDescription,
+                    onValueChange = { eventDescription = it },
                     label = { Text("Event Description") },
                     modifier = Modifier
                         .padding(2.dp)
@@ -558,10 +564,10 @@ fun CreateEventPopup(
                             (amount.isEmpty() && currency.isEmpty()) -> "0.00Eur"
                             amount.isEmpty() -> "0.00$currency"
                             currency.isEmpty() -> amount+"Eur"
+                            !amount.contains(".") -> "$amount.00$currency"
                             amount.split(".")[1].length == 1 -> amount+"0"+currency
                             amount.contains(".") && amount.split(".")[1].isEmpty() ->
                                 amount+"00"+currency
-                            !amount.contains(".") -> "$amount.00$currency"
                             else -> amount+currency
                         }
                         createEventRequested(

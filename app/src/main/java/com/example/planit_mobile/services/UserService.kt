@@ -2,6 +2,8 @@ package com.example.planit_mobile.services
 
 import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.services.models.AuthOutputModel
+import com.example.planit_mobile.services.models.SearchEventResult
+import com.example.planit_mobile.services.models.UserEventsResult
 
 /**
  * Interface for interacting with user-related operations in the PlanIt application.
@@ -67,4 +69,14 @@ interface UserService {
         interests: List<String>,
         description: String
     )
+
+
+    /**
+     * Retrieves the events that the user is participating in.
+     *
+     * @param userAccessToken The access token for the user.
+     * @param userRefreshToken The refresh token for the user.
+     * @return The events that the user is participating in.
+     */
+    suspend fun getUserEvents(userAccessToken: String, userRefreshToken: String): UserEventsResult
 }

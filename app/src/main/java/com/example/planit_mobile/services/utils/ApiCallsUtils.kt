@@ -59,6 +59,19 @@ class ApiRequests(val client: OkHttpClient, val gson: Gson) {
         return callApi(req)
     }
 
+    suspend inline fun <reified R> deleteRequest(
+        url: String,
+        accessToken: String? = null,
+        refreshToken: String? = null
+    ): R {
+        val req = Request.Builder().url(url).addHeader("accept", "application/json")
+            .addHeader(setCookie, "access_token=$accessToken")
+            .addHeader(setCookie, "refresh_token=$refreshToken")
+            .delete()
+            .build()
+        return callApi(req)
+    }
+
 
     suspend inline fun <reified R> callApi(
         request: Request

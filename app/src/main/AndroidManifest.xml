@@ -40,6 +40,9 @@
         <activity
             android:name=".ui.screens.profile.EditUserProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.screens.eventDetails.EventDetailsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

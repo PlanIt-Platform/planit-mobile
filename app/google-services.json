@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "708606212293",
+    "project_id": "planit-chat-4d37d",
+    "storage_bucket": "planit-chat-4d37d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708606212293:android:2a981b313f882166f358ac",
+        "android_client_info": {
+          "package_name": "com.example.planit_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9IN9XplWrb-sZyeEeRbjhu6zE_T1VjV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
