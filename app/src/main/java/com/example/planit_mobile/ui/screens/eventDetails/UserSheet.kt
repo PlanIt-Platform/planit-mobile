@@ -163,22 +163,24 @@ fun UserList(
                             }
                         }
                         if (userID != user.id) {
-                            IconButton(
-                                onClick = {
-                                    selectedUserId = user.id
-                                    showAssignTaskDialog = true
-                                },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = Color(
-                                        0xFF15AD18
+                            if(user.taskId == null || user.taskName == null || user.taskName == "") {
+                                IconButton(
+                                    onClick = {
+                                        selectedUserId = user.id
+                                        showAssignTaskDialog = true
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = Color(
+                                            0xFF15AD18
+                                        )
                                     )
-                                )
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_menu_add),
-                                    contentDescription = "Assign Task",
-                                    tint = Color.White
-                                )
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_menu_add),
+                                        contentDescription = "Assign Task",
+                                        tint = Color.White
+                                    )
+                                }
                             }
                             IconButton(
                                 onClick = { kickUser(user.id) },

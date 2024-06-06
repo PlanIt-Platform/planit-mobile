@@ -1,8 +1,6 @@
 package com.example.planit_mobile.ui.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
@@ -13,11 +11,9 @@ import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
 import com.example.planit_mobile.services.utils.launchAndRequest
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.errorMessage
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val service: UserService,
@@ -108,7 +104,8 @@ class HomeViewModel(
             onSuccess = { result ->
                 val (id, eventTitle, status) = result
                 eventCreatedMessage.value = "$eventTitle with ID $id: $status"
-                showEventCreated()
+                eventCreated.value = true
+                refreshData()
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
             sessionStorage = sessionStorage
@@ -130,22 +127,16 @@ class HomeViewModel(
         )
     }
 
+    fun dismissEventCreated() {
+        eventCreated.value = false
+    }
+
     fun refreshData() {
         getUserEvents()
     }
 
     fun dismissError() {
         errorStateFlow.value = Error("")
-    }
-
-    private fun showEventCreated() {
-        eventCreated.value = true
-
-        viewModelScope.launch {
-            delay(3000)
-            eventCreated.value = false
-
-        }
     }
 
     private val _homeTabState = MutableStateFlow(HomeTabState.HOME)

@@ -63,6 +63,7 @@ class EditUserProfileViewModel (
             },
             onSuccess = {
                 userInfoFlow.value = it
+                loadStateFlow.value = loaded(it)
             },
             onFailure = {
                 errorStateFlow.value = errorMessage(it.message.toString())

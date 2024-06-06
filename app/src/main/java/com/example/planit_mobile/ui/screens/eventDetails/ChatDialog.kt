@@ -1,13 +1,9 @@
 package com.example.planit_mobile.ui.screens.eventDetails
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,9 +38,7 @@ fun ChatDialog(
 ) {
     var message by remember { mutableStateOf("") }
 
-    Dialog(
-        onDismissRequest = onDismiss
-    ) {
+    Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxHeight(0.85F)
@@ -52,85 +46,96 @@ fun ChatDialog(
                 .background(Color(0xFF221C36)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize()
+            // Top section with close button and title
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
-                    verticalArrangement = Arrangement.Top
+                IconButton(
+                    onClick = { onDismiss() },
+                    modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    IconButton(
-                        onClick = { onDismiss() },
-                        modifier = Modifier
-                            .padding(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Close",
-                            tint = Color.White
-                        )
-                    }
-                    Text(
-                        text = "Event Chat",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = Color.White
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Close",
+                        tint = Color.White
                     )
-                    Spacer(modifier = Modifier.padding(16.dp))
                 }
+                Text(
+                    text = "Event Chat",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = Color.White
+                )
+            }
 
-                LazyColumn {
-                    item {
-                        messages.forEach {
-                            Row {
-                                Icon(
-                                    imageVector = Icons.Filled.Person,
-                                    contentDescription = "User",
-                                    tint = Color.White,
-                                    modifier = Modifier.padding(5.dp)
-                                )
-                                Text(
-                                    text = buildAnnotatedString(
-                                        boldText = (it.name ?: "Unknown") + ": ",
-                                        normalText = it.text
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            }
+            // Chat messages section
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                reverseLayout = true
+            ) {
+                messages.reversed().forEach { message ->
+                    item{
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = "User",
+                                tint = Color.White,
+                                modifier = Modifier.padding(5.dp)
+                            )
+                            Text(
+                                text = buildAnnotatedString(
+                                    (message.name ?: "Unknown") + ": ",
+                                    message.text
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                modifier = Modifier.padding(8.dp)
+                            )
                         }
                     }
                 }
+            }
 
-                Column (
-                    modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-                ){
-                    TextField(
-                        value = message,
-                        onValueChange = { message = it },
-                        label = { Text("Message") },
-                        modifier = Modifier
-                            .padding(16.dp),
+            // Bottom section with text field and send button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    value = message,
+                    onValueChange = { message = it },
+                    label = { Text("Message") },
+                    modifier = Modifier.weight(1f),
+                    maxLines = 4
+                )
+                IconButton(
+                    onClick = {
+                        if (message.isNotEmpty()) {
+                            sendMessage(message)
+                            message = ""
+                        }
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = Color.Blue
+                    ),
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = "Send",
+                        tint = Color.White
                     )
-                    IconButton(
-                        onClick = {
-                            if (message.isNotEmpty()) {
-                                sendMessage(message)
-                                message = ""
-                            }
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = Color.Blue
-                        ),
-                        modifier = Modifier
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Send,
-                            contentDescription = "Send",
-                            tint = Color.White
-                        )
-                    }
-                    Spacer(modifier = Modifier.padding(16.dp))
                 }
             }
         }

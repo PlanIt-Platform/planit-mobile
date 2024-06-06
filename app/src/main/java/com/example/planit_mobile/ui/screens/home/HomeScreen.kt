@@ -3,7 +3,6 @@ package com.example.planit_mobile.ui.screens.home
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,7 +53,8 @@ fun HomeScreen(
     eventCreatedPopUp : Boolean,
     eventCreatedMessage : String,
     userEvents: UserEventsResult?,
-    onEventClick: (SearchEventResult) -> Unit
+    onEventClick: (SearchEventResult) -> Unit,
+    dismissEventCreatedPopUp: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -120,6 +120,7 @@ fun HomeScreen(
         // Event Created Popup
         if (eventCreatedPopUp) {
             Toast.makeText(LocalContext.current, eventCreatedMessage, Toast.LENGTH_SHORT).show()
+            dismissEventCreatedPopUp()
         }
 
     }
@@ -172,6 +173,7 @@ fun PreviewUserProfileScreen() {
             "username",
             listOf()
         ),
-        onEventClick = {}
+        onEventClick = {},
+        dismissEventCreatedPopUp = {}
     )
 }

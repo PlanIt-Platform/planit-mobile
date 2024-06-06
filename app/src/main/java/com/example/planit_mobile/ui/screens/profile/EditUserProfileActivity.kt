@@ -65,29 +65,29 @@ class EditUserProfileActivity : ComponentActivity() {
                     val categories = editUserViewModel.categoriesState.collectAsState(initial = emptyList()).value
                     val errorMessage = editUserViewModel.errorState.collectAsState(initial = Error("")).value.message
 
-                    /*if (loadState is Loading) {
+                    if (loadState is Loading) {
                         LoadingScreen {
                             HomeActivity.navigateTo(this@EditUserProfileActivity)
                         }
-                    } else {*/
-                    if(user != null) {
-                        EditUserProfileScreen(
-                            categories = categories,
-                            onBackRequested = { finish() },
-                            onEdit = { name, interests, description ->
-                                editUserViewModel.editUser(name, interests, description)
-                                HomeActivity.navigateTo(this@EditUserProfileActivity)
-                            },
-                            userInfo = user
-                        )
-                        ErrorPopup(
-                            showDialog = errorMessage != "",
-                            errorMessage = errorMessage
-                        ) {
-                            editUserViewModel.dismissError()
+                    } else {
+                        if(user != null) {
+                            EditUserProfileScreen(
+                                categories = categories,
+                                onBackRequested = { finish() },
+                                onEdit = { name, interests, description ->
+                                    editUserViewModel.editUser(name, interests, description)
+                                    finish()
+                                },
+                                userInfo = user
+                            )
+                            ErrorPopup(
+                                showDialog = errorMessage != "",
+                                errorMessage = errorMessage
+                            ) {
+                                editUserViewModel.dismissError()
+                            }
                         }
                     }
-                    //}
                 }
             }
         }

@@ -181,6 +181,12 @@ class EventDetailsViewModel(
             },
             onSuccess = {
                 eventDeleted.value = true
+                val firebaseDB = Firebase.firestore
+                firebaseDB.collection("events/${eventID}/messages").get().addOnSuccessListener {
+                    for (document in it.documents) {
+                        document.reference.delete()
+                    }
+                }
             },
             onFailure = {
                 errorStateFlow.value = errorMessage(it.message.toString())
@@ -395,7 +401,6 @@ class EventDetailsViewModel(
         message: String
     ) {
         val firebaseDB = Firebase.firestore
-        Log.d("EVENT_User", "sending message: ${userInfo.value?.name}")
         if (userInfo.value != null){
             firebaseDB.collection("events/${eventID}/messages").add(
                 hashMapOf(

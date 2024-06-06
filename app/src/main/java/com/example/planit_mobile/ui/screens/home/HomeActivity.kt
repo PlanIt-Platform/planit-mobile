@@ -3,6 +3,7 @@ package com.example.planit_mobile.ui.screens.home
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -77,8 +78,19 @@ class HomeActivity : ComponentActivity() {
 
         lifecycleScope.launch{
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                eventViewModel.searchEvents(null, 0)
-                homeViewModel.getUserEvents()
+                homeViewModel.homeTabState.collect { homeTab ->
+                    if (homeTab == HomeTabState.HOME) {
+                        homeViewModel.getCategories()
+                        homeViewModel.getUserEvents()
+                    }
+                    if (homeTab == HomeTabState.PROFILE) {
+                        userViewModel.refreshData()
+                    }
+                    if (homeTab == HomeTabState.EVENTS) {
+                        eventViewModel.searchEvents(null, 0)
+                        homeViewModel.getUserEvents()
+                    }
+                }
             }
         }
 
@@ -98,7 +110,6 @@ class HomeActivity : ComponentActivity() {
                     when (homeTabState) {
 
                         HomeTabState.HOME -> {
-                            homeViewModel.getCategories()
                             val categories =
                                 homeViewModel.categoriesState.collectAsState(initial = emptyList()).value
                             val subcategories =
@@ -147,13 +158,15 @@ class HomeActivity : ComponentActivity() {
                                             price,
                                             password
                                         )
-                                        homeViewModel.refreshData()
                                     },
                                     eventCreatedPopUp = eventCreatedState,
                                     eventCreatedMessage = eventCreatedMessage,
                                     userEvents = userEvents,
                                     onEventClick = { event ->
                                         EventDetailsActivity.navigateTo(this@HomeActivity, event.id, event.visibility)
+                                    },
+                                    dismissEventCreatedPopUp = {
+                                        homeViewModel.dismissEventCreated()
                                     }
                                 )
                                 ErrorPopup(
