@@ -144,13 +144,15 @@ class HomeActivity : ComponentActivity() {
                                     },
                                     subCategories = subcategories,
                                     createEventRequested = { title, description, category,
-                                                             subcategory, location, visibility, date,
-                                                             endDate, price, password ->
+                                                             subcategory, locationType, location,
+                                                             visibility, date, endDate, price,
+                                                             password ->
                                         homeViewModel.createEvent(
                                             title,
                                             description,
                                             category,
                                             subcategory,
+                                            locationType,
                                             location,
                                             visibility,
                                             date,
@@ -252,6 +254,9 @@ class HomeActivity : ComponentActivity() {
                                 onEventClick = { event ->
                                     EventDetailsActivity.navigateTo(this@HomeActivity, event.id, event.visibility)
                                 },
+                                searchEventCode = {
+
+                                }
                             )
                             ErrorPopup(
                                 showDialog = userErrorMessage != "" || eventErrorMessage != "",

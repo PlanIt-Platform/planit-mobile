@@ -77,6 +77,7 @@ class HomeViewModel(
         description: String?,
         category: String,
         subcategory: String,
+        locationType: String?,
         location: String?,
         visibility: String?,
         date: String,
@@ -93,6 +94,7 @@ class HomeViewModel(
                     description,
                     category,
                     subcategory,
+                    locationType,
                     location,
                     visibility,
                     date,
@@ -102,7 +104,7 @@ class HomeViewModel(
                 )
             },
             onSuccess = { result ->
-                val (id, eventTitle, status) = result
+                val (id, eventTitle, code, status) = result
                 eventCreatedMessage.value = "$eventTitle with ID $id: $status"
                 eventCreated.value = true
                 refreshData()

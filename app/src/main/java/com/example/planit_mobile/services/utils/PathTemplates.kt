@@ -24,8 +24,8 @@ object PathTemplates {
     private const val LEAVE_EVENT = "${PLANIT_API_URL}/event/{id}/leave"
     private const val DELETE_EVENT = "${PLANIT_API_URL}/event/{id}"
     private const val EDIT_EVENT = "${PLANIT_API_URL}/event/{id}/edit"
-    private const val REMOVE_USER_TASK = "${PLANIT_API_URL}/user/{userId}/event/{eventId}/task/{taskId}"
-    private const val ASSIGN_USER_TASK = "${PLANIT_API_URL}/user/{userId}/event/{eventId}/task"
+    private const val REMOVE_USER_ROLE = "${PLANIT_API_URL}/user/{userId}/event/{eventId}/role/{roleId}"
+    private const val ASSIGN_USER_ROLE = "${PLANIT_API_URL}/user/{userId}/event/{eventId}/role"
     private const val KICK_USER_FROM_EVENT = "${PLANIT_API_URL}/event/{eventId}/kick/{userId}"
     private const val GET_POLLS = "${PLANIT_API_URL}/event/{id}/polls"
     private const val CREATE_POLL = "${PLANIT_API_URL}/event/{id}/poll"
@@ -58,13 +58,13 @@ object PathTemplates {
 
     fun getEditEventPath(id: Int): String = EDIT_EVENT.replace("{id}", "$id")
 
-    fun getRemoveUserTaskPath(userId: Int, eventId: Int, taskId: Int): String =
-        REMOVE_USER_TASK.replace("{userId}", "$userId")
+    fun getRemoveUserRolePath(userId: Int, eventId: Int, roleId: Int): String =
+        REMOVE_USER_ROLE.replace("{userId}", "$userId")
             .replace("{eventId}", "$eventId")
-            .replace("{taskId}", "$taskId")
+            .replace("{roleId}", "$roleId")
 
-    fun getAssignUserTaskPath(userId: Int, eventId: Int): String =
-        ASSIGN_USER_TASK.replace("{userId}", "$userId")
+    fun getAssignUserRolePath(userId: Int, eventId: Int): String =
+        ASSIGN_USER_ROLE.replace("{userId}", "$userId")
             .replace("{eventId}", "$eventId")
 
     fun getKickUserFromEventPath(eventId: Int, userId: Int): String =

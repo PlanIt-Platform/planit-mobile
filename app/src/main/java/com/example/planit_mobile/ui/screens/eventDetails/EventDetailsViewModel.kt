@@ -114,7 +114,7 @@ class EventDetailsViewModel(
                 }
                 if(!update)loadStateFlow.value = loaded(null)
                 isUserOrganizerFlow.value = it.users.any {
-                    user -> user.taskName == "Organizer" && user.id == sessionStorage.getUserID()
+                    user -> user.roleName == "Organizer" && user.id == sessionStorage.getUserID()
                 }
             },
             onFailure = {
@@ -226,6 +226,7 @@ class EventDetailsViewModel(
         description: String?,
         category: String,
         subCategory: String?,
+        locationType: String?,
         location: String?,
         visibility: String,
         date: String,
@@ -243,6 +244,7 @@ class EventDetailsViewModel(
                     description,
                     category,
                     subCategory,
+                    locationType,
                     location,
                     visibility,
                     date,
@@ -261,14 +263,14 @@ class EventDetailsViewModel(
         )
     }
 
-    fun removeUserTask(
+    fun removeRole(
         eventID: Int,
         userID: Int,
-        taskId: Int
+        roleId: Int
     ) {
         launchAndAuthenticateRequest(
             request = { userAccessToken, userRefreshToken, _ ->
-                service.removeUserTask(userAccessToken, userRefreshToken, userID, eventID, taskId)
+                service.removeUserRole(userAccessToken, userRefreshToken, userID, eventID, roleId)
             },
             onSuccess = {
                 getUsersInEventAndIsUserInEvent(eventID, true)
@@ -280,14 +282,13 @@ class EventDetailsViewModel(
         )
     }
 
-    fun assignUserTask(
+    fun assignRole(
         eventID: Int,
-        userID: Int,
-        taskName: String
+        userID: Int
     ) {
         launchAndAuthenticateRequest(
             request = { userAccessToken, userRefreshToken, _ ->
-                service.assignUserTask(userAccessToken, userRefreshToken, userID, eventID, taskName)
+                service.assignUserRole(userAccessToken, userRefreshToken, userID, eventID, "Organizer")
             },
             onSuccess = {
                 getUsersInEventAndIsUserInEvent(eventID, true)

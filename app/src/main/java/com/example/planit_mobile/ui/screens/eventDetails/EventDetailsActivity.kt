@@ -19,6 +19,7 @@ import com.example.planit_mobile.ui.screens.common.ErrorPopup
 import com.example.planit_mobile.ui.screens.common.LoadingScreen
 import com.example.planit_mobile.ui.screens.common.idle
 import com.example.planit_mobile.ui.screens.common.loading
+import com.example.planit_mobile.ui.screens.otheruserprofile.OtherUserActivity
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
 
@@ -98,10 +99,10 @@ class EventDetailsActivity : ComponentActivity() {
                         )
                     } else {
                         if (!isUserInEvent && visibility == "Private") {
-                            UserNotInPrivateEventScreen(joinEvent =
-                            { password ->
-                                viewModel.joinEvent(eventId, password)
-                            },
+                            UserNotInPrivateEventScreen(
+                                joinEvent = { password ->
+                                        viewModel.joinEvent(eventId, password)
+                                },
                                 onBackRequested = { finish() }
                             )
                         } else {
@@ -125,8 +126,13 @@ class EventDetailsActivity : ComponentActivity() {
                                     leaveEvent = {
                                         viewModel.leaveEvent(eventId)
                                     },
-                                    editEvent = { name, description, category, subCategory, location, visibility, date, endDate, price, password ->
-                                        viewModel.editEvent(eventId, name, description, category, subCategory, location, visibility, date, endDate, price, password)
+                                    editEvent = { name, description, category, subCategory, locationType,
+                                                  location, visibility, date, endDate, price, password ->
+                                        viewModel.editEvent(
+                                            eventId, name, description, category, subCategory,
+                                            locationType, location, visibility, date, endDate, price,
+                                            password
+                                        )
                                     },
                                     deleteEvent = {
                                         viewModel.deleteEvent(eventId)
@@ -139,14 +145,14 @@ class EventDetailsActivity : ComponentActivity() {
                                     updateUsersInEvent = {
                                         viewModel.getUsersInEventAndIsUserInEvent(eventId, true)
                                     },
-                                    removeUserTask = { userID, taskID ->
-                                        viewModel.removeUserTask(eventId, userID, taskID)
-                                    },
-                                    assignUserTask = { userID, taskName ->
-                                        viewModel.assignUserTask(eventId, userID, taskName)
-                                    },
                                     kickUser = { userID ->
                                         viewModel.kickUserFromEvent(eventId, userID)
+                                    },
+                                    assignRole = { userID ->
+                                        viewModel.assignRole(eventId, userID)
+                                    },
+                                    removeRole = { userID, roleID ->
+                                        viewModel.removeRole(eventId, userID, roleID)
                                     },
                                     userID = userIDState,
                                     getPolls = {
@@ -167,7 +173,10 @@ class EventDetailsActivity : ComponentActivity() {
                                             viewModel.sendMessage(eventId, message)
                                         }
                                     },
-                                    messages = messages
+                                    messages = messages,
+                                    onNavigateToOtherUserProfile = { userId ->
+                                        OtherUserActivity.navigateTo(this, userId)
+                                    }
                                 )
                             }
                         }

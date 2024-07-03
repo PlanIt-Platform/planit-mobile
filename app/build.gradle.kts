@@ -58,6 +58,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.0")
 
+    implementation ("com.google.android.gms:play-services-maps:18.0.2")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation ("com.google.maps.android:maps-compose:4.4.1")
+
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-firestore")
 

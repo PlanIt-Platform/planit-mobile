@@ -10,5 +10,6 @@ package com.example.planit_mobile.services.models
 data class CreateEventOutputModel(
     val id: Int,
     val title: String,
+    val code: String,
     val status: String
 )

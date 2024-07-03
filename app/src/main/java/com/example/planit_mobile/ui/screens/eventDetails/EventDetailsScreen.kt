@@ -45,16 +45,16 @@ fun EventDetailsScreen(
     isUserOrganizer : Boolean,
     leaveEvent: () -> Unit,
     editEvent: (
-        String, String?, String, String?, String?, String, String, String?, String, String
+        String, String?, String, String?, String?, String?, String, String, String?, String, String
     ) -> Unit,
     deleteEvent: () -> Unit,
     categories: List<String>,
     onCategorySelected: (String) -> Unit,
     subCategories: List<String>,
     updateUsersInEvent: () -> Unit,
-    removeUserTask: (Int, Int) -> Unit,
-    assignUserTask: (Int, String) -> Unit,
     kickUser: (Int) -> Unit,
+    assignRole: (Int) -> Unit,
+    removeRole: (Int, Int) -> Unit,
     userID : Int?,
     getPolls: () -> Unit,
     polls: List<PollModel>?,
@@ -62,7 +62,8 @@ fun EventDetailsScreen(
     deletePoll: (Int) -> Unit,
     voteOnPoll: (Int, Int) -> Unit,
     sendMessage: (String) -> Unit,
-    messages: List<Message>
+    messages: List<Message>,
+    onNavigateToOtherUserProfile: (Int) -> Unit
 ) {
     var showUserSheet by remember { mutableStateOf(false) }
     var showPollsDialog by remember { mutableStateOf(false) }
@@ -111,8 +112,10 @@ fun EventDetailsScreen(
                     isUserInEvent = isUserInEvent,
                     isUserOrganizer = isUserOrganizer,
                     leaveEvent = {leaveEvent()},
-                    editEvent = { title, description, category, subCategory, location, visibility, date, endDate, price, password ->
-                        editEvent(title, description, category, subCategory, location, visibility, date, endDate, price, password)
+                    editEvent = { title, description, category, subCategory, locationType,
+                                  location, visibility, date, endDate, price, password ->
+                        editEvent(title, description, category, subCategory, locationType,
+                            location, visibility, date, endDate, price, password)
                     },
                     deleteEvent = {deleteEvent()},
                     categories = categories,
@@ -125,16 +128,19 @@ fun EventDetailsScreen(
                     usersInEvent = usersInEvent ?: emptyList(),
                     onDismiss = { showUserSheet = false },
                     isUserOrganizer = isUserOrganizer,
-                    removeUserTask = {userId, taskId ->
-                        removeUserTask (userId, taskId)
-                    },
-                    assignUserTask = {userId, task ->
-                        assignUserTask(userId, task)
-                    },
                     kickUser = {userId ->
                         kickUser(userId)
                     },
-                    userID = userID
+                    assignRole = {userId ->
+                        assignRole(userId)
+                    },
+                    removeRole = {userId, roleId ->
+                        removeRole(userId, roleId)
+                    },
+                    userID = userID,
+                    onNavigateToOtherUserProfile = {userId ->
+                        onNavigateToOtherUserProfile(userId)
+                    }
                 )
             }
             if(showPollsDialog){

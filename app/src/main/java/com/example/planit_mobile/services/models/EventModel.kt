@@ -6,10 +6,12 @@ data class EventModel(
     val description: String?,
     val category: String,
     val subcategory: String?,
+    val locationType: String?,
     val location: String?,
     val visibility: String,
     val date: String,
     val priceAmount: Double?,
     val endDate: String?,
-    val priceCurrency: String?
+    val priceCurrency: String?,
+    val code: String
 )

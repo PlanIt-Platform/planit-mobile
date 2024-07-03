@@ -11,15 +11,22 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,14 +37,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.planit_mobile.services.models.SearchEventResult
 import com.example.planit_mobile.services.models.UserEventsResult
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun HomeScreen(
@@ -48,7 +58,7 @@ fun HomeScreen(
     onCategorySelected: (String) -> Unit,
     subCategories: List<String>,
     createEventRequested : (
-        String, String, String, String, String, String, String, String, String, String
+        String, String, String, String, String?, String?, String, String, String, String, String
     ) -> Unit,
     eventCreatedPopUp : Boolean,
     eventCreatedMessage : String,
@@ -62,6 +72,34 @@ fun HomeScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Home",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp // Adjust the font size as needed
+                    )
+                },
+                colors = topAppBarColors(containerColor = Color(24, 38, 44, 255)),
+                actions = {
+                    IconButton(
+                        onClick = {
+                            // TODO
+                        },
+                        modifier = Modifier.size(35.dp) // Adjust the icon size as needed
+                    ) {
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = "Calendar",
+                            tint = Color.White,
+                            modifier = Modifier.size(29.dp) // This adjusts the size of the Icon itself
+                        )
+                    }
+                }
+            )
+        },
         bottomBar = {
             BotBar(navigation =
             NavigationHandlers(
@@ -121,6 +159,7 @@ fun HomeScreen(
         if (eventCreatedPopUp) {
             Toast.makeText(LocalContext.current, eventCreatedMessage, Toast.LENGTH_SHORT).show()
             dismissEventCreatedPopUp()
+            showDialog = false
         }
 
     }
@@ -165,7 +204,7 @@ fun PreviewUserProfileScreen() {
         categories = listOf("Simple Meeting", "Birthday Party", "Wedding"),
         onCategorySelected = {},
         subCategories = listOf("Relaxed", "Serious", "Casual"),
-        createEventRequested = { _, _, _, _, _, _, _, _, _, _ -> },
+        createEventRequested = { _, _, _, _, _, _, _, _, _, _, _ -> },
         eventCreatedPopUp = false,
         eventCreatedMessage = "",
         userEvents = UserEventsResult(

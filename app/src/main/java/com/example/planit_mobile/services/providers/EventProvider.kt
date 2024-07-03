@@ -1,8 +1,7 @@
 package com.example.planit_mobile.services.providers
 
-import android.util.Log
 import com.example.planit_mobile.services.EventService
-import com.example.planit_mobile.services.models.CreateEventInputModel
+import com.example.planit_mobile.services.models.EventInputModel
 import com.example.planit_mobile.services.models.CreateEventOutputModel
 import com.example.planit_mobile.services.models.CreatePollOutputModel
 import com.example.planit_mobile.services.models.EventModel
@@ -13,7 +12,7 @@ import com.example.planit_mobile.services.models.UsersInEventResult
 import com.example.planit_mobile.services.utils.ApiRequests
 import com.example.planit_mobile.services.utils.PathTemplates.CREATE_EVENT
 import com.example.planit_mobile.services.utils.PathTemplates.GET_CATEGORIES
-import com.example.planit_mobile.services.utils.PathTemplates.getAssignUserTaskPath
+import com.example.planit_mobile.services.utils.PathTemplates.getAssignUserRolePath
 import com.example.planit_mobile.services.utils.PathTemplates.getCreatePollPath
 import com.example.planit_mobile.services.utils.PathTemplates.getDeleteEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getEditEventPath
@@ -23,13 +22,12 @@ import com.example.planit_mobile.services.utils.PathTemplates.getKickUserFromEve
 import com.example.planit_mobile.services.utils.PathTemplates.getLeaveEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getPollPath
 import com.example.planit_mobile.services.utils.PathTemplates.getPollsPath
-import com.example.planit_mobile.services.utils.PathTemplates.getRemoveUserTaskPath
+import com.example.planit_mobile.services.utils.PathTemplates.getRemoveUserRolePath
 import com.example.planit_mobile.services.utils.PathTemplates.getSubcategoriesPath
 import com.example.planit_mobile.services.utils.PathTemplates.getUsersInEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getVotePollPath
 import com.example.planit_mobile.services.utils.PathTemplates.searchEventPath
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import okhttp3.OkHttpClient
 
 class EventProvider(
@@ -43,6 +41,7 @@ class EventProvider(
         description: String?,
         category: String,
         subcategory: String,
+        locationType: String?,
         location: String?,
         visibility: String?,
         date: String,
@@ -50,11 +49,12 @@ class EventProvider(
         price: String,
         password: String
     ): CreateEventOutputModel {
-        val data = CreateEventInputModel(
+        val data = EventInputModel(
             title,
             description,
             category,
             subcategory,
+            locationType,
             location,
             visibility,
             date,
@@ -149,6 +149,7 @@ class EventProvider(
     description: String?,
     category: String,
     subcategory: String?,
+    locationType: String?,
     location: String?,
     visibility: String,
     date: String,
@@ -156,49 +157,51 @@ class EventProvider(
     price: String,
     password: String
     ): SuccessMessage {
+        val data = EventInputModel(
+            title,
+            description,
+            category,
+            subcategory,
+            locationType,
+            location,
+            visibility,
+            date,
+            endDate,
+            price,
+            password
+        )
         return ApiRequests(client, gson).putRequest(
             getEditEventPath(eventID),
-            "{" +
-                    "\"title\":\"$title\"," +
-                    if(description != null)"\"description\":\"$description\"," else "" +
-                    "\"category\":\"$category\"," +
-                    if(subcategory != null)"\"subcategory\":\"$subcategory\"," else "" +
-                    "\"location\":\"$location\"," +
-                    "\"visibility\":\"$visibility\"," +
-                    "\"date\":\"$date\"," +
-                    if(endDate != null) "\"endDate\":\"$endDate\"," else "" +
-                    "\"price\":\"$price\"," +
-                    "\"password\":\"$password\"" +
-                "}",
+            gson.toJson(data),
             userAccessToken,
             userRefreshToken
         )
     }
 
-    override suspend fun removeUserTask(
+    override suspend fun removeUserRole(
         userAccessToken: String,
         userRefreshToken: String,
         userId: Int,
         eventId: Int,
-        taskId: Int
+        roleId: Int
     ): SuccessMessage {
         return ApiRequests(client, gson).deleteRequest(
-            getRemoveUserTaskPath(userId, eventId, taskId),
+            getRemoveUserRolePath(userId, eventId, roleId),
             userAccessToken,
             userRefreshToken
         )
     }
 
-    override suspend fun assignUserTask(
+    override suspend fun assignUserRole(
         userAccessToken: String,
         userRefreshToken: String,
         userId: Int,
         eventId: Int,
-        taskName: String
+        roleName: String
     ): SuccessMessage {
         return ApiRequests(client, gson).postRequest(
-            getAssignUserTaskPath(userId, eventId),
-            "{\"taskName\":\"$taskName\"}",
+            getAssignUserRolePath(userId, eventId),
+            "{\"roleName\":\"$roleName\"}",
             userAccessToken,
             userRefreshToken
         )

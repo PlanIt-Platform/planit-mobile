@@ -42,7 +42,7 @@ class UserProvider(
     override suspend fun login(emailOrName: String, password: String): AuthOutputModel =
         ApiRequests(client, gson).postRequest(
             LOGIN_URL,
-            "{\"emailOrName\":\"$emailOrName\",\"password\":\"$password\"}"
+            "{\"emailOrUsername\":\"$emailOrName\",\"password\":\"$password\"}"
         )
 
     override suspend fun logout(accessToken: String, refreshToken: String): Unit =

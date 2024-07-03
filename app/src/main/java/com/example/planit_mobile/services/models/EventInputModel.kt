@@ -13,11 +13,12 @@ package com.example.planit_mobile.services.models
  * @param price The price of the event.
  * @param password The password of the event.
  */
-data class CreateEventInputModel(
+data class EventInputModel(
     val title: String,
     val description: String?,
     val category: String,
-    val subCategory: String,
+    val subCategory: String?,
+    val locationType: String?,
     val location: String?,
     val visibility: String?,
     val date: String,

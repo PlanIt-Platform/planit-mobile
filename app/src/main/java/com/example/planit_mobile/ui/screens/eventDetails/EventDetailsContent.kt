@@ -1,7 +1,7 @@
 package com.example.planit_mobile.ui.screens.eventDetails
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
+import android.location.Geocoder
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
@@ -31,9 +33,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,8 +55,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.services.models.EventModel
+import com.example.planit_mobile.ui.screens.common.MyGoogleMap
 import com.example.planit_mobile.ui.screens.common.buildAnnotatedString
+import com.example.planit_mobile.ui.screens.common.endDatePickerDialog
 import com.example.planit_mobile.ui.screens.common.formatDate
+import com.example.planit_mobile.ui.screens.common.startDatePickerDialog
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.rememberCameraPositionState
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -64,24 +74,33 @@ fun EventDetailsContent(
     isUserOrganizer: Boolean,
     leaveEvent: () -> Unit,
     editEvent: (
-        String, String?, String, String?, String?, String, String, String?, String, String
+        String, String?, String, String?, String?, String?, String, String, String?, String, String
     ) -> Unit,
     deleteEvent: () -> Unit,
     categories: List<String>,
     onCategorySelected: (String) -> Unit,
     subCategories: List<String>
 ) {
-
+    Log.d("EventDetailsContent", "EventDetailsContent")
     var editMode by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf(eventDetails.title) }
     var description by remember { mutableStateOf(eventDetails.description) }
     var category by remember { mutableStateOf(eventDetails.category) }
     var subCategory by remember { mutableStateOf(eventDetails.subcategory) }
+    var locationType by remember { mutableStateOf(eventDetails.locationType) }
     var location by remember { mutableStateOf(eventDetails.location) }
+    var locationLink by remember { mutableStateOf("") }
     var visibility by remember { mutableStateOf(eventDetails.visibility) }
     var amount by remember { mutableStateOf("") }
     var currency by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val initialLocation = LatLng(0.0, 0.0)
+    var locationCoords by remember { mutableStateOf(initialLocation)}
+    var columnScrollingEnabled by remember { mutableStateOf(true) }
+    var markerVisibility by remember { mutableStateOf(false) }
+    var locationSearch by remember { mutableStateOf("") }
+    var locationSwitchState by remember { mutableStateOf(false) }
 
     var catExpanded by remember { mutableStateOf(false) }
     var subCatExpanded by remember { mutableStateOf(false) }
@@ -97,138 +116,21 @@ fun EventDetailsContent(
 
     var passwordVisibility by remember { mutableStateOf(false) }
 
-    val startDatePickerDialog = DatePickerDialog(
+    val startDatePickerDialog = startDatePickerDialog(
         context,
-        { _, year, month, dayOfMonth ->
-            val selectedDate = Calendar.getInstance().apply {
-                set(Calendar.YEAR, year)
-                set(Calendar.MONTH, month)
-                set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            }
-            val currentDate = Calendar.getInstance()
-            if (selectedDate.before(currentDate)) {
-                Toast.makeText(context, "Start Date must be after current date", Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-
-                val timePickerDialog = TimePickerDialog(
-                    context,
-                    { _, hourOfDay, minute ->
-                        val selectedTime = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            set(Calendar.MINUTE, minute)
-                        }
-                        if (selectedDate.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR) &&
-                            selectedDate.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR) &&
-                            selectedTime.before(currentDate)
-                        ) {
-                            Toast.makeText(
-                                context,
-                                "Start Date must be after current date",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            calendar.set(Calendar.MINUTE, minute)
-                            startDateTime = dateFormat.format(calendar.time)
-                        }
-                    },
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE),
-                    true
-                )
-                if (selectedDate.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR) &&
-                    selectedDate.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR)
-                ) {
-                    timePickerDialog.updateTime(
-                        currentDate.get(Calendar.HOUR_OF_DAY), currentDate.get(
-                            Calendar.MINUTE
-                        )
-                    )
-                }
-                timePickerDialog.show()
-            }
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
+        calendar,
+        { sdt -> startDateTime = sdt },
+        dateFormat
     )
 
     startDatePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
 
-    val endDatePickerDialog = DatePickerDialog(
+    val endDatePickerDialog = endDatePickerDialog(
         context,
-        { _, year, month, dayOfMonth ->
-            val selectedEndDate = Calendar.getInstance().apply {
-                set(Calendar.YEAR, year)
-                set(Calendar.MONTH, month)
-                set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            }
-            val startDate = Calendar.getInstance().apply {
-                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                time = sdf.parse(startDateTime)!!
-            }
-            if (selectedEndDate.get(Calendar.DAY_OF_YEAR) < startDate.get(Calendar.DAY_OF_YEAR) ||
-                selectedEndDate.get(Calendar.YEAR) < startDate.get(Calendar.YEAR)
-            ) {
-                Toast.makeText(context, "End date must be after start date", Toast.LENGTH_SHORT)
-                    .show()
-                endDateTime = ""
-            } else {
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-
-                val timePickerDialog = TimePickerDialog(
-                    context,
-                    { _, hourOfDay, minute ->
-                        val selectedTime = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            set(Calendar.MINUTE, minute)
-                        }
-                        val startDateHourMinute = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, startDate.get(Calendar.HOUR_OF_DAY))
-                            set(Calendar.MINUTE, startDate.get(Calendar.MINUTE))
-                        }
-                        if (
-                            (selectedEndDate.get(Calendar.DAY_OF_YEAR) == startDate.get(Calendar.DAY_OF_YEAR) &&
-                                    selectedEndDate.get(Calendar.YEAR) == startDate.get(Calendar.YEAR) &&
-                                    selectedTime.timeInMillis <= startDateHourMinute.timeInMillis)
-                        ) {
-                            Toast.makeText(
-                                context,
-                                "End date must be after start date",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            endDateTime = ""
-                        } else {
-                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            calendar.set(Calendar.MINUTE, minute)
-                            endDateTime = dateFormat.format(calendar.time)
-                        }
-                    },
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE),
-                    true
-                )
-                if (selectedEndDate.get(Calendar.DAY_OF_YEAR) == startDate.get(Calendar.DAY_OF_YEAR) &&
-                    selectedEndDate.get(Calendar.YEAR) == startDate.get(Calendar.YEAR)
-                ) {
-                    timePickerDialog.updateTime(
-                        startDate.get(Calendar.HOUR_OF_DAY), startDate.get(
-                            Calendar.MINUTE
-                        )
-                    )
-                }
-                timePickerDialog.show()
-            }
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
+        startDateTime,
+        { edt -> endDateTime = edt },
+        calendar,
+        dateFormat
     )
 
     endDatePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
@@ -236,140 +138,102 @@ fun EventDetailsContent(
     Box(
         contentAlignment = Alignment.Center,
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(
+                    rememberScrollState(),
+                    columnScrollingEnabled
+                ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
+            //Title
+            DetailsTexts(
+                "Title",
+                title,
+                editMode,
+                true,
+                MaterialTheme.typography.displayMedium,
+                Color.White
+            ) { t ->
+                title = t
+            }
 
-                //Title
+            //Description
+            DetailsTexts(
+                "Description",
+                if (description != "") description
+                else "No description available",
+                editMode,
+            ) { d ->
+                description = d
+            }
+
+            //Visibility
+            if (!editMode) {
                 DetailsTexts(
-                    "Title",
-                    title,
-                    editMode,
-                    true,
-                    MaterialTheme.typography.displayMedium,
-                    Color.White
-                ) { t ->
-                    title = t
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                //Description
-                DetailsTexts(
-                    "Description",
-                    if (description != "") description
-                    else "No description available",
-                    editMode,
-                ) { d ->
-                    description = d
-                }
-
-                //Visibility
-                if (!editMode) {
-                    DetailsTexts(
-                        "Visibility: ",
-                        visibility,
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
-                            .background(Color.LightGray, RoundedCornerShape(4.dp))
+                    "Visibility",
+                    visibility,
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
+                        .background(Color.LightGray, RoundedCornerShape(4.dp))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(visibility, modifier = Modifier.padding(start = 7.dp))
-                            Spacer(modifier = Modifier.weight(1f))
-                            IconButton(onClick = { visibilityExpanded = true }) {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select visibility"
-                                )
-                            }
-                        }
-                        DropdownMenu(
-                            expanded = visibilityExpanded,
-                            onDismissRequest = { visibilityExpanded = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Public") },
-                                onClick = {
-                                    visibility = "Public"
-                                    password = ""
-                                    visibilityExpanded = false
-                                }
+                        Text(visibility, modifier = Modifier.padding(start = 7.dp))
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { visibilityExpanded = true }) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Select visibility"
                             )
-                            DropdownMenuItem(
-                                text = { Text("Private") },
-                                onClick = {
-                                    visibility = "Private"
-                                    visibilityExpanded = false
-                                }
-                            )
-
                         }
                     }
-                }
-
-                //Date
-                Row {
-                    if (!editMode) {
-                        DetailsTexts("Date: ", formatDate(eventDetails.date))
-                    } else {
-                        Column {
-                            TextField(
-                                value = startDateTime,
-                                onValueChange = { startDateTime = it },
-                                label = { Text("Start Date *") },
-                                modifier = Modifier
-                                    .padding(2.dp)
-                                    .fillMaxWidth(0.8f),
-                                readOnly = true,
-                                trailingIcon = {
-                                    IconButton(onClick = { startDatePickerDialog.show() }) {
-                                        Icon(
-                                            Icons.Default.DateRange,
-                                            contentDescription = "Pick Date"
-                                        )
-                                    }
-                                }
-                            )
-                            if (startDateTime.isEmpty()) {
-                                Text(
-                                    text = "(Start Date must be after current date)",
-                                    color = Color.Red,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                )
+                    DropdownMenu(
+                        expanded = visibilityExpanded,
+                        onDismissRequest = { visibilityExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Public") },
+                            onClick = {
+                                visibility = "Public"
+                                password = ""
+                                visibilityExpanded = false
                             }
-                        }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Private") },
+                            onClick = {
+                                visibility = "Private"
+                                visibilityExpanded = false
+                            }
+                        )
+
                     }
                 }
+            }
 
-                //End Date
+            //Date
+            Row {
                 if (!editMode) {
-                    DetailsTexts(
-                        "End Date",
-                        if (eventDetails.endDate != null) formatDate(eventDetails.endDate) else ""
-                    )
+                    DetailsTexts("Date", formatDate(eventDetails.date))
                 } else {
                     Column {
                         TextField(
-                            value = endDateTime,
-                            onValueChange = { endDateTime = it },
-                            label = { Text("End Date") },
+                            value = startDateTime,
+                            onValueChange = { startDateTime = it },
+                            label = { Text("Start Date *") },
                             modifier = Modifier
                                 .padding(2.dp)
                                 .fillMaxWidth(0.8f),
                             readOnly = true,
-                            enabled = startDateTime.isNotEmpty(),
                             trailingIcon = {
-                                IconButton(onClick = { if (startDateTime.isNotEmpty()) endDatePickerDialog.show() }) {
+                                IconButton(onClick = { startDatePickerDialog.show() }) {
                                     Icon(
                                         Icons.Default.DateRange,
                                         contentDescription = "Pick Date"
@@ -377,9 +241,9 @@ fun EventDetailsContent(
                                 }
                             }
                         )
-                        if (endDateTime.isEmpty()) {
+                        if (startDateTime.isEmpty()) {
                             Text(
-                                text = "(End Date must be after Start Date)",
+                                text = "(Start Date must be after current date)",
                                 color = Color.Red,
                                 fontSize = 12.sp,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -387,191 +251,374 @@ fun EventDetailsContent(
                         }
                     }
                 }
+            }
 
-                //Location
-                DetailsTexts("Location", location, editMode) { l ->
-                    location = l
-                }
-
-                //Category
-                if (!editMode) {
-                    DetailsTexts("Category", eventDetails.category)
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
-                            .background(Color.LightGray, RoundedCornerShape(4.dp))
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(category, modifier = Modifier.padding(start = 7.dp))
-                            Spacer(modifier = Modifier.weight(1f))
-                            IconButton(onClick = { catExpanded = true }) {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select Category"
-                                )
-                            }
-                        }
-                        DropdownMenu(
-                            expanded = catExpanded,
-                            onDismissRequest = { catExpanded = false },
-                            modifier = Modifier.width(200.dp)
-                        ) {
-                            categories.forEach { cat ->
-                                DropdownMenuItem(
-                                    text = { Text(cat) },
-                                    onClick = {
-                                        category = cat
-                                        catExpanded = false
-                                        if (cat != "Simple Meeting") {
-                                            onCategorySelected(cat)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                //Subcategory
-                if (!editMode) {
-                    DetailsTexts("Subcategory", eventDetails.subcategory)
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
-                            .background(Color.LightGray, RoundedCornerShape(4.dp))
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                subCategory ?: "",
-                                modifier = Modifier.padding(start = 7.dp)
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            IconButton(onClick = { subCatExpanded = true }) {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select subcategory"
-                                )
-                            }
-                        }
-                        DropdownMenu(
-                            expanded = subCatExpanded,
-                            onDismissRequest = { subCatExpanded = false }
-                        ) {
-                            if (category.isNotEmpty()) {
-                                DropdownMenuItem(
-                                    text = { Text("") },
-                                    onClick = {
-                                        subCategory = ""
-                                        subCatExpanded = false
-                                    }
-                                )
-                                subCategories.forEach { subCat ->
-                                    DropdownMenuItem(
-                                        text = { Text(subCat) },
-                                        onClick = {
-                                            if (category.isNotEmpty()) {
-                                                subCategory = subCat
-                                                subCatExpanded = false
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Price
-                if (!editMode) {
-                    if (eventDetails.priceAmount != null && eventDetails.priceCurrency != null) {
-                        DetailsTexts(
-                            "Price: ",
-                            "${eventDetails.priceAmount}${eventDetails.priceCurrency}"
-                        )
-                    }
-                } else {
-                    Column {
-                        Text(
-                            text = "Price",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Row(modifier = Modifier.fillMaxWidth(0.8f)) {
-                            // Amount Field
-                            TextField(
-                                value = amount,
-                                onValueChange = {
-                                    if ((it.toDoubleOrNull() != null && it.toDouble() > 0 && it.matches(
-                                            "^-?\\d*(\\.\\d{0,2})?$".toRegex()
-                                        )) || it.isEmpty() || it == ""
-                                    ) {
-                                        amount = it
-                                    }
-                                },
-                                label = { Text("Amount") },
-                                modifier = Modifier
-                                    .weight(0.55f)
-                                    .padding(2.dp),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                            )
-
-                            // Currency Field
-                            TextField(
-                                value = currency,
-                                onValueChange = {
-                                    if (it.length <= 3) {
-                                        currency = it
-                                    }
-                                },
-                                label = { Text("Currency") },
-                                modifier = Modifier
-                                    .weight(0.45f)
-                                    .padding(2.dp),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-                            )
-                        }
-                    }
-                }
-
-                //Password
-                if (editMode && visibility == "Private") {
+            //End Date
+            if (!editMode) {
+                DetailsTexts(
+                    "End Date",
+                    if (eventDetails.endDate != null) formatDate(eventDetails.endDate) else ""
+                )
+            } else {
+                Column {
                     TextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Change Old Password") },
-                        visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
-                                Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = if (passwordVisibility) "Hide password" else "Show password"
-                                )
-                            }
-                        },
+                        value = endDateTime,
+                        onValueChange = { endDateTime = it },
+                        label = { Text("End Date") },
                         modifier = Modifier
                             .padding(2.dp)
-                            .fillMaxWidth(0.8f)
+                            .fillMaxWidth(0.8f),
+                        readOnly = true,
+                        enabled = startDateTime.isNotEmpty(),
+                        trailingIcon = {
+                            IconButton(onClick = { if (startDateTime.isNotEmpty()) endDatePickerDialog.show() }) {
+                                Icon(
+                                    Icons.Default.DateRange,
+                                    contentDescription = "Pick Date"
+                                )
+                            }
+                        }
+                    )
+                    if (endDateTime.isEmpty()) {
+                        Text(
+                            text = "(End Date must be after Start Date)",
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+            }
+
+            //Location Type
+            if (!editMode) {
+                if (eventDetails.locationType != null){
+                    DetailsTexts(title = "Location Type", text = eventDetails.locationType)
+                }
+            }
+
+            //Location
+            if(!editMode){
+                if (eventDetails.location != null && eventDetails.location != ""){
+                    DetailsTexts(title = "Location", text = eventDetails.location)
+                    if(eventDetails.locationType == "Physical"){
+                        var successfulLocation by remember { mutableStateOf(false)}
+                        try{
+                            val geocoder = Geocoder(context, Locale.getDefault())
+                            val locationName =
+                                geocoder.getFromLocationName(eventDetails.location, 1)
+                            if(locationName != null){
+                                val locationLatLng = locationName[0]
+                                location = locationLatLng.getAddressLine(0)
+                                locationCoords = LatLng(locationLatLng.latitude, locationLatLng.longitude)
+                            }
+                            successfulLocation = true
+                        } catch (e: Exception){
+                            Toast.makeText(context, "Location not found", Toast.LENGTH_SHORT).show()
+                        }
+                        if(successfulLocation){
+                            val cameraPositionState = rememberCameraPositionState {
+                                position = CameraPosition.fromLatLngZoom(locationCoords, 8f)
+                            }
+                            LaunchedEffect(cameraPositionState.isMoving) {
+                                if (!cameraPositionState.isMoving) {
+                                    columnScrollingEnabled = true
+                                }
+                            }
+                            MyGoogleMap(
+                                viewOnlyMode = true,
+                                cameraPositionState = cameraPositionState,
+                                context = context,
+                                locationCoords = locationCoords,
+                                markerVisibility = true,
+                                columnScrollingEnabled = { scroll -> columnScrollingEnabled = scroll }
+                            )
+                        } else {
+                            DetailsTexts(title = "Location", text = "")
+                        }
+                    } else {
+                        DetailsTexts(title = "Event Link", text = eventDetails.location)
+                    }
+                }
+            } else {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Location Type",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Switch(
+                            checked = locationSwitchState,
+                            onCheckedChange = {
+                                locationSwitchState = it
+                                locationType = if (!locationSwitchState) "Physical" else "Online"
+                            },
+                            modifier = Modifier.padding(5.dp)
+                        )
+                        Text(
+                            locationType ?: "Physical",
+                            color = Color.White
+                        )
+                    }
+
+                    if (locationType == "Online") {
+                        TextField(
+                            value = locationLink,
+                            onValueChange = { locationLink = it },
+                            label = { Text("Insert link to event") },
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .fillMaxWidth(0.9f)
+                        )
+                    } else if (locationType == "Physical") {
+                        if(location != "" && location != null) markerVisibility = true
+                        val cameraPositionState = rememberCameraPositionState {
+                            position = CameraPosition.fromLatLngZoom(initialLocation, 0.5f)
+                        }
+                        LaunchedEffect(cameraPositionState.isMoving) {
+                            if (!cameraPositionState.isMoving) {
+                                columnScrollingEnabled = true
+                            }
+                        }
+                        TextField(
+                            value = locationSearch,
+                            onValueChange = { locationSearch = it },
+                            label = { Text("Search Location") },
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .fillMaxWidth(0.9f),
+                            keyboardActions = KeyboardActions(onDone = {
+                                try{
+                                    val geocoder = Geocoder(context, Locale.getDefault())
+                                    val locationName =
+                                        geocoder.getFromLocationName(locationSearch, 1)
+                                    if(locationName != null){
+                                        val locationLatLng = locationName[0]
+                                        location = locationLatLng.getAddressLine(0)
+                                        locationCoords = LatLng(locationLatLng.latitude, locationLatLng.longitude)
+                                        markerVisibility = true
+                                        cameraPositionState.position = CameraPosition.fromLatLngZoom(locationCoords, 15f)
+                                    }
+                                } catch (e: Exception){
+                                    Toast.makeText(context, "Location not found", Toast.LENGTH_SHORT).show()
+                                }
+                            }),
+                            singleLine = true
+                        )
+                        MyGoogleMap(
+                            viewOnlyMode = false,
+                            cameraPositionState = cameraPositionState,
+                            context = context,
+                            locationCoords = locationCoords,
+                            markerVisibility = markerVisibility,
+                            columnScrollingEnabled = { scroll -> columnScrollingEnabled = scroll },
+                            locationChange = { locat -> location = locat },
+                            locationCoordsChange = { coords -> locationCoords = coords },
+                            markerVisibilityChange = { marker -> markerVisibility = marker }
+                        )
+                        Text(
+                            text = "Selected location: $location",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                        Button(
+                            onClick = {
+                                location = ""
+                                locationSearch = ""
+                                locationCoords = initialLocation
+                                markerVisibility = false
+                            }
+                        ) {
+                            Text("Clear Location")
+                        }
+                    }
+                }
+            }
+
+            //Category
+            if (!editMode) {
+                DetailsTexts("Category", eventDetails.category)
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
+                        .background(Color.LightGray, RoundedCornerShape(4.dp))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(category, modifier = Modifier.padding(start = 7.dp))
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { catExpanded = true }) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Select Category"
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = catExpanded,
+                        onDismissRequest = { catExpanded = false },
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        categories.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat) },
+                                onClick = {
+                                    category = cat
+                                    catExpanded = false
+                                    if (cat != "Simple Meeting") {
+                                        onCategorySelected(cat)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            //Subcategory
+            if (!editMode) {
+                DetailsTexts("Subcategory", eventDetails.subcategory)
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
+                        .background(Color.LightGray, RoundedCornerShape(4.dp))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            subCategory ?: "",
+                            modifier = Modifier.padding(start = 7.dp)
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { subCatExpanded = true }) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Select subcategory"
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = subCatExpanded,
+                        onDismissRequest = { subCatExpanded = false }
+                    ) {
+                        if (category.isNotEmpty()) {
+                            DropdownMenuItem(
+                                text = { Text("") },
+                                onClick = {
+                                    subCategory = ""
+                                    subCatExpanded = false
+                                }
+                            )
+                            subCategories.forEach { subCat ->
+                                DropdownMenuItem(
+                                    text = { Text(subCat) },
+                                    onClick = {
+                                        if (category.isNotEmpty()) {
+                                            subCategory = subCat
+                                            subCatExpanded = false
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Price
+            if (!editMode) {
+                if (eventDetails.priceAmount != null && eventDetails.priceCurrency != null) {
+                    DetailsTexts(
+                        "Price",
+                        "${eventDetails.priceAmount}${eventDetails.priceCurrency}"
                     )
                 }
+            } else {
+                Column {
+                    Text(
+                        text = "Price",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Row(modifier = Modifier.fillMaxWidth(0.8f)) {
+                        // Amount Field
+                        TextField(
+                            value = amount,
+                            onValueChange = {
+                                if ((it.toDoubleOrNull() != null && it.toDouble() > 0 && it.matches(
+                                        "^-?\\d*(\\.\\d{0,2})?$".toRegex()
+                                    )) || it.isEmpty() || it == ""
+                                ) {
+                                    amount = it
+                                }
+                            },
+                            label = { Text("Amount") },
+                            modifier = Modifier
+                                .weight(0.55f)
+                                .padding(2.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
 
-                Spacer(modifier = Modifier.height(20.dp))
-
+                        // Currency Field
+                        TextField(
+                            value = currency,
+                            onValueChange = {
+                                if (it.length <= 3) {
+                                    currency = it
+                                }
+                            },
+                            label = { Text("Currency") },
+                            modifier = Modifier
+                                .weight(0.45f)
+                                .padding(2.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                        )
+                    }
+                }
             }
+
+            //Password
+            if (editMode && visibility == "Private") {
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Change Old Password") },
+                    visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = if (passwordVisibility) "Hide password" else "Show password"
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxWidth(0.8f)
+                )
+            }
+
             // Leave, Edit and Delete Buttons
-            if (isUserInEvent && !editMode) item {
+            if (isUserInEvent && !editMode)
                 Row(
                     horizontalArrangement = Arrangement.Center
                 ) {
+                    Spacer(modifier = Modifier.height(10.dp))
                     Button(
                         onClick = { leaveEvent() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
@@ -618,12 +665,20 @@ fun EventDetailsContent(
                         }
                     }
                 }
-            }
             //Save Changes Button
             if (editMode) {
-                item {
+                Row (modifier = Modifier.padding(top = 15.dp)) {
+                    Text(
+                        text = "* Required Fields",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(5.dp)
+                    )
+                }
+                Row (horizontalArrangement = Arrangement.Center){
                     Button(
                         onClick = {
+                            locationSearch = ""
                             val price = when {
                                 (amount.isEmpty() && currency.isEmpty()) -> "0.00Eur"
                                 amount.isEmpty() -> "0.00$currency"
@@ -635,20 +690,37 @@ fun EventDetailsContent(
 
                                 else -> amount + currency
                             }
+                            val finalLocation =
+                                if (locationType == "Physical") {
+                                    if (location == "") null else location
+                                } else {
+                                    if (locationLink == "") null else locationLink
+                                }
+                            val finalLocationType =
+                                if (finalLocation == null) null else locationType
                             editEvent(
-                                title, description, category, subCategory, location, visibility,
-                                startDateTime, endDateTime, price, password
+                                title,
+                                description,
+                                category,
+                                subCategory,
+                                finalLocationType,
+                                finalLocation,
+                                visibility,
+                                startDateTime,
+                                endDateTime,
+                                price,
+                                password
                             )
                             editMode = false
                         },
                         modifier = Modifier
-                            .align(Alignment.CenterEnd)
                             .padding(bottom = 10.dp),
                     ) {
                         Text("Save Changes", color = Color.White)
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(50.dp))
         }
         if (editMode) {
             IconButton(

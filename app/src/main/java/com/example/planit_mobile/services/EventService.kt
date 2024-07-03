@@ -32,6 +32,7 @@ interface EventService {
         description: String?,
         category: String,
         subcategory: String,
+        locationType: String?,
         location: String?,
         visibility: String?,
         date: String,
@@ -139,6 +140,7 @@ interface EventService {
         description: String?,
         category: String,
         subcategory: String?,
+        locationType: String?,
         location: String?,
         visibility: String,
         date: String,
@@ -147,20 +149,20 @@ interface EventService {
         password: String
     ): SuccessMessage
 
-    suspend fun removeUserTask(
+    suspend fun removeUserRole(
         userAccessToken: String,
         userRefreshToken: String,
         userId: Int,
         eventId: Int,
-        taskId: Int
+        roleId: Int
     ): SuccessMessage
 
-    suspend fun assignUserTask(
+    suspend fun assignUserRole(
         userAccessToken: String,
         userRefreshToken: String,
         userId: Int,
         eventId: Int,
-        taskName: String
+        roleName: String
     ): SuccessMessage
 
     suspend fun kickUserFromEvent(

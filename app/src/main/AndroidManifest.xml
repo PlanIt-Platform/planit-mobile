@@ -43,6 +43,18 @@
         <activity
             android:name=".ui.screens.eventDetails.EventDetailsActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.screens.otheruserprofile.OtherUserActivity"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAtqkocmk09tuLeKdXr1bjGfA6HQC9wDcI"/>
+
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET"
+        tools:ignore="ManifestOrder" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
 </manifest>
