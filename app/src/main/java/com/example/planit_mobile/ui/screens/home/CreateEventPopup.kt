@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -63,20 +62,16 @@ import java.util.Locale
 fun CreateEventPopup(
     onDismiss: (Boolean) -> Unit,
     categories: List<String>,
-    onCategorySelected: (String) -> Unit,
-    subCategories: List<String>,
     createEventRequested: (
-        String, String, String, String, String?, String?, String, String, String, String, String
+        String, String, String, String?, String?, String, String, String, String, String
     ) -> Unit,
     eventCreatedPopUp: Boolean
 ) {
     var eventName by remember { mutableStateOf("") }
     var eventDescription by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-    var expandedSub by remember { mutableStateOf(false) }
     var expandedVisibility by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("") }
-    var selectedSubCategory by remember { mutableStateOf("") }
     var selectedVisibility by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var locationLink by remember { mutableStateOf("") }
@@ -184,7 +179,7 @@ fun CreateEventPopup(
             )
         }
 
-        // Categories, Subcategories and Visibility
+        // Categories and Visibility
         Row(
             modifier = Modifier.padding(start = 10.dp ,top = 10.dp, bottom = 20.dp),
             horizontalArrangement = Arrangement.Center
@@ -232,67 +227,8 @@ fun CreateEventPopup(
                                     onClick = {
                                         selectedCategory = category
                                         expanded = false
-                                        if (selectedCategory != "Simple Meeting") {
-                                            onCategorySelected(category)
-                                        }
                                     }
                                 )
-                            }
-                        }
-                    }
-                }
-
-                // Subcategories
-                Row(modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 5.dp)) {
-                    Text(
-                        "Subcategories",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                }
-                Row {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
-                            .background(Color.LightGray, RoundedCornerShape(4.dp))
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(selectedSubCategory, modifier = Modifier.padding(start = 7.dp))
-                            Spacer(modifier = Modifier.weight(1f))
-                            IconButton(onClick = { expandedSub = true }) {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select subcategory"
-                                )
-                            }
-                        }
-                        DropdownMenu(
-                            expanded = expandedSub,
-                            onDismissRequest = { expandedSub = false }
-                        ) {
-                            if (selectedCategory.isNotEmpty()) {
-                                DropdownMenuItem(
-                                    text = { Text("") },
-                                    onClick = {
-                                        selectedSubCategory = ""
-                                        expandedSub = false
-                                    }
-                                )
-                                subCategories.forEach { subCategory ->
-                                    DropdownMenuItem(
-                                        text = { Text(subCategory) },
-                                        onClick = {
-                                            if (selectedCategory.isNotEmpty()) {
-                                                selectedSubCategory = subCategory
-                                                expandedSub = false
-                                            }
-                                        }
-                                    )
-                                }
                             }
                         }
                     }
@@ -433,7 +369,8 @@ fun CreateEventPopup(
                     Text(
                         locationType,
                         color = Color.White,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 
@@ -602,7 +539,7 @@ fun CreateEventPopup(
                         }
                     val finalLocationType = if (finalLocation == null) null else locationType
                     createEventRequested(
-                        eventName, eventDescription, selectedCategory, selectedSubCategory,
+                        eventName, eventDescription, selectedCategory,
                         finalLocationType, finalLocation, selectedVisibility, startDateTime,
                         endDateTime, price, password
                     )
@@ -618,9 +555,9 @@ fun CreateEventPopup(
 
     if (eventCreatedPopUp) {
         //clear all fields
-        eventName = ""; eventDescription = ""; selectedCategory = ""
-        selectedSubCategory = ""; location = ""; selectedVisibility = ""
-        startDateTime = ""; endDateTime = ""; amount = ""; currency = ""; password = ""
+        eventName = ""; eventDescription = ""; selectedCategory = ""; locationType = ""
+        location = ""; selectedVisibility = ""; startDateTime = ""; endDateTime = ""; amount = ""
+        currency = ""; password = ""
 
         onDismiss(false)
     }

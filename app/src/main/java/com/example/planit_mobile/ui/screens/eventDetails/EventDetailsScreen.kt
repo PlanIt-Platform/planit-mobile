@@ -45,12 +45,10 @@ fun EventDetailsScreen(
     isUserOrganizer : Boolean,
     leaveEvent: () -> Unit,
     editEvent: (
-        String, String?, String, String?, String?, String?, String, String, String?, String, String
+        String, String?, String, String?, String?, String, String, String?, String, String
     ) -> Unit,
     deleteEvent: () -> Unit,
     categories: List<String>,
-    onCategorySelected: (String) -> Unit,
-    subCategories: List<String>,
     updateUsersInEvent: () -> Unit,
     kickUser: (Int) -> Unit,
     assignRole: (Int) -> Unit,
@@ -112,15 +110,13 @@ fun EventDetailsScreen(
                     isUserInEvent = isUserInEvent,
                     isUserOrganizer = isUserOrganizer,
                     leaveEvent = {leaveEvent()},
-                    editEvent = { title, description, category, subCategory, locationType,
+                    editEvent = { title, description, category, locationType,
                                   location, visibility, date, endDate, price, password ->
-                        editEvent(title, description, category, subCategory, locationType,
+                        editEvent(title, description, category, locationType,
                             location, visibility, date, endDate, price, password)
                     },
                     deleteEvent = {deleteEvent()},
-                    categories = categories,
-                    onCategorySelected = onCategorySelected,
-                    subCategories = subCategories
+                    categories = categories
                 )
             }
             if(showUserSheet) {

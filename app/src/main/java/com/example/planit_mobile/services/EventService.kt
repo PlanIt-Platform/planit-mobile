@@ -31,7 +31,6 @@ interface EventService {
         title: String,
         description: String?,
         category: String,
-        subcategory: String,
         locationType: String?,
         location: String?,
         visibility: String?,
@@ -69,12 +68,6 @@ interface EventService {
      * @return The categories of events available in the application.
      */
     suspend fun getCategories(): List<String>
-
-    /**
-     * Retrieves the subcategories of events available in the application.
-     * @return The subcategories of events available in the application.
-     */
-    suspend fun getSubcategories(category: String): List<String>
 
     /**
      * Searches for events based on the provided query.
@@ -139,7 +132,6 @@ interface EventService {
         title: String,
         description: String?,
         category: String,
-        subcategory: String?,
         locationType: String?,
         location: String?,
         visibility: String,

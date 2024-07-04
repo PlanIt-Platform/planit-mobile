@@ -29,7 +29,6 @@ class HomeViewModel(
 
     private val categoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
-    private val subcategoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     private val eventCreated = MutableStateFlow(false)
     private val eventCreatedMessage = MutableStateFlow("")
     private val userEvents: MutableStateFlow<UserEventsResult?> = MutableStateFlow(null)
@@ -38,8 +37,6 @@ class HomeViewModel(
         get() = categoriesFlow.asStateFlow()
     val errorState: Flow<Error>
         get() = errorStateFlow.asStateFlow()
-    val subcategoriesState: Flow<List<String>>
-        get() = subcategoriesFlow.asStateFlow()
     val eventCreatedState: Flow<Boolean>
         get() = eventCreated.asStateFlow()
     val eventCreatedMessageState: Flow<String>
@@ -57,26 +54,10 @@ class HomeViewModel(
         )
     }
 
-    fun getSubcategories(category: String) {
-        launchAndRequest(
-            request = {
-                val validURICategory = category.replace(" ", "-")
-                eventService.getSubcategories(validURICategory)
-            },
-            onSuccess = {
-                subcategoriesFlow.value = it
-            },
-            onFailure = {
-                errorStateFlow.value = errorMessage(it.message.toString())
-            },
-        )
-    }
-
     fun createEvent(
         title: String,
         description: String?,
         category: String,
-        subcategory: String,
         locationType: String?,
         location: String?,
         visibility: String?,
@@ -93,7 +74,6 @@ class HomeViewModel(
                     title,
                     description,
                     category,
-                    subcategory,
                     locationType,
                     location,
                     visibility,

@@ -40,7 +40,6 @@ class EventProvider(
         title: String,
         description: String?,
         category: String,
-        subcategory: String,
         locationType: String?,
         location: String?,
         visibility: String?,
@@ -53,7 +52,6 @@ class EventProvider(
             title,
             description,
             category,
-            subcategory,
             locationType,
             location,
             visibility,
@@ -92,9 +90,6 @@ class EventProvider(
 
     override suspend fun getCategories(): List<String>
         = ApiRequests(client, gson).getRequest(GET_CATEGORIES)
-
-    override suspend fun getSubcategories(category: String): List<String> =
-        ApiRequests(client, gson).getRequest(getSubcategoriesPath(category))
 
     override suspend fun searchEvents(
         userAccessToken: String,
@@ -148,7 +143,6 @@ class EventProvider(
     title: String,
     description: String?,
     category: String,
-    subcategory: String?,
     locationType: String?,
     location: String?,
     visibility: String,
@@ -161,7 +155,6 @@ class EventProvider(
             title,
             description,
             category,
-            subcategory,
             locationType,
             location,
             visibility,

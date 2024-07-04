@@ -55,10 +55,8 @@ fun HomeScreen(
     onHomeRequested: () -> Unit,
     onEventsRequested: () -> Unit,
     categories: List<String>,
-    onCategorySelected: (String) -> Unit,
-    subCategories: List<String>,
     createEventRequested : (
-        String, String, String, String, String?, String?, String, String, String, String, String
+        String, String, String, String?, String?, String, String, String, String, String
     ) -> Unit,
     eventCreatedPopUp : Boolean,
     eventCreatedMessage : String,
@@ -146,8 +144,6 @@ fun HomeScreen(
                     CreateEventPopup (
                         onDismiss = { action -> showDialog = action },
                         categories = categories,
-                        onCategorySelected = onCategorySelected,
-                        subCategories = subCategories,
                         createEventRequested = createEventRequested,
                         eventCreatedPopUp = eventCreatedPopUp
                     )
@@ -202,9 +198,7 @@ fun PreviewUserProfileScreen() {
         onHomeRequested = {},
         onEventsRequested = {},
         categories = listOf("Simple Meeting", "Birthday Party", "Wedding"),
-        onCategorySelected = {},
-        subCategories = listOf("Relaxed", "Serious", "Casual"),
-        createEventRequested = { _, _, _, _, _, _, _, _, _, _, _ -> },
+        createEventRequested = { _, _, _, _, _, _, _, _, _, _ -> },
         eventCreatedPopUp = false,
         eventCreatedMessage = "",
         userEvents = UserEventsResult(

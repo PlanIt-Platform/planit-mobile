@@ -17,7 +17,6 @@ data class EventInputModel(
     val title: String,
     val description: String?,
     val category: String,
-    val subCategory: String?,
     val locationType: String?,
     val location: String?,
     val visibility: String?,

@@ -3,7 +3,6 @@ package com.example.planit_mobile.ui.screens.home
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -112,8 +111,6 @@ class HomeActivity : ComponentActivity() {
                         HomeTabState.HOME -> {
                             val categories =
                                 homeViewModel.categoriesState.collectAsState(initial = emptyList()).value
-                            val subcategories =
-                                homeViewModel.subcategoriesState.collectAsState(initial = emptyList()).value
                             val homeErrorMessage =
                                 homeViewModel.errorState.collectAsState(initial = Error("")).value.message
                             val eventCreatedState =
@@ -139,19 +136,13 @@ class HomeActivity : ComponentActivity() {
                                         homeViewModel.setHomeTabState(HomeTabState.EVENTS)
                                     },
                                     categories = categories,
-                                    onCategorySelected = { category ->
-                                        homeViewModel.getSubcategories(category)
-                                    },
-                                    subCategories = subcategories,
                                     createEventRequested = { title, description, category,
-                                                             subcategory, locationType, location,
-                                                             visibility, date, endDate, price,
-                                                             password ->
+                                                             locationType, location, visibility,
+                                                             date, endDate, price, password ->
                                         homeViewModel.createEvent(
                                             title,
                                             description,
                                             category,
-                                            subcategory,
                                             locationType,
                                             location,
                                             visibility,

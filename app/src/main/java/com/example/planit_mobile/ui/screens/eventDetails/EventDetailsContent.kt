@@ -1,7 +1,6 @@
 package com.example.planit_mobile.ui.screens.eventDetails
 
 import android.location.Geocoder
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -74,22 +73,28 @@ fun EventDetailsContent(
     isUserOrganizer: Boolean,
     leaveEvent: () -> Unit,
     editEvent: (
-        String, String?, String, String?, String?, String?, String, String, String?, String, String
+        String, String?, String, String?, String?, String, String, String?, String, String
     ) -> Unit,
     deleteEvent: () -> Unit,
-    categories: List<String>,
-    onCategorySelected: (String) -> Unit,
-    subCategories: List<String>
+    categories: List<String>
 ) {
-    Log.d("EventDetailsContent", "EventDetailsContent")
     var editMode by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf(eventDetails.title) }
     var description by remember { mutableStateOf(eventDetails.description) }
     var category by remember { mutableStateOf(eventDetails.category) }
-    var subCategory by remember { mutableStateOf(eventDetails.subcategory) }
     var locationType by remember { mutableStateOf(eventDetails.locationType) }
-    var location by remember { mutableStateOf(eventDetails.location) }
-    var locationLink by remember { mutableStateOf("") }
+    var location by remember {
+        mutableStateOf(
+            if(eventDetails.locationType == "Physical") eventDetails.location ?: ""
+            else ""
+        )
+    }
+    var locationLink by remember {
+        mutableStateOf(
+            if(eventDetails.locationType == "Online") eventDetails.location ?: ""
+            else ""
+        )
+    }
     var visibility by remember { mutableStateOf(eventDetails.visibility) }
     var amount by remember { mutableStateOf("") }
     var currency by remember { mutableStateOf("") }
@@ -100,10 +105,11 @@ fun EventDetailsContent(
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     var markerVisibility by remember { mutableStateOf(false) }
     var locationSearch by remember { mutableStateOf("") }
-    var locationSwitchState by remember { mutableStateOf(false) }
+    var locationSwitchState by remember {
+        mutableStateOf(eventDetails.locationType != "Physical")
+    }
 
     var catExpanded by remember { mutableStateOf(false) }
-    var subCatExpanded by remember { mutableStateOf(false) }
     var visibilityExpanded by remember { mutableStateOf(false) }
 
     var startDateTime by remember { mutableStateOf(eventDetails.date.dropLast(3)) }
@@ -170,6 +176,52 @@ fun EventDetailsContent(
                 description = d
             }
 
+            //Category
+            if (!editMode) {
+                DetailsTexts("Category", eventDetails.category)
+            } else {
+                DetailsTexts(
+                    title = "Category",
+                    text = "Category",
+                    textOnly = true,
+                    color = Color.White
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
+                        .background(Color.LightGray, RoundedCornerShape(4.dp))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(category, modifier = Modifier.padding(start = 7.dp))
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { catExpanded = true }) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Select Category"
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = catExpanded,
+                        onDismissRequest = { catExpanded = false },
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        categories.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat) },
+                                onClick = {
+                                    category = cat
+                                    catExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
             //Visibility
             if (!editMode) {
                 DetailsTexts(
@@ -177,6 +229,12 @@ fun EventDetailsContent(
                     visibility,
                 )
             } else {
+                DetailsTexts(
+                    title = "Visibility",
+                    text = "Visibility",
+                    textOnly = true,
+                    color = Color.White
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
@@ -290,18 +348,11 @@ fun EventDetailsContent(
                 }
             }
 
-            //Location Type
-            if (!editMode) {
-                if (eventDetails.locationType != null){
-                    DetailsTexts(title = "Location Type", text = eventDetails.locationType)
-                }
-            }
-
             //Location
             if(!editMode){
                 if (eventDetails.location != null && eventDetails.location != ""){
-                    DetailsTexts(title = "Location", text = eventDetails.location)
                     if(eventDetails.locationType == "Physical"){
+                        DetailsTexts(title = "Location", text = eventDetails.location)
                         var successfulLocation by remember { mutableStateOf(false)}
                         try{
                             val geocoder = Geocoder(context, Locale.getDefault())
@@ -437,102 +488,6 @@ fun EventDetailsContent(
                             }
                         ) {
                             Text("Clear Location")
-                        }
-                    }
-                }
-            }
-
-            //Category
-            if (!editMode) {
-                DetailsTexts("Category", eventDetails.category)
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
-                        .background(Color.LightGray, RoundedCornerShape(4.dp))
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(category, modifier = Modifier.padding(start = 7.dp))
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(onClick = { catExpanded = true }) {
-                            Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = "Select Category"
-                            )
-                        }
-                    }
-                    DropdownMenu(
-                        expanded = catExpanded,
-                        onDismissRequest = { catExpanded = false },
-                        modifier = Modifier.width(200.dp)
-                    ) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = { Text(cat) },
-                                onClick = {
-                                    category = cat
-                                    catExpanded = false
-                                    if (cat != "Simple Meeting") {
-                                        onCategorySelected(cat)
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            //Subcategory
-            if (!editMode) {
-                DetailsTexts("Subcategory", eventDetails.subcategory)
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
-                        .background(Color.LightGray, RoundedCornerShape(4.dp))
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            subCategory ?: "",
-                            modifier = Modifier.padding(start = 7.dp)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(onClick = { subCatExpanded = true }) {
-                            Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = "Select subcategory"
-                            )
-                        }
-                    }
-                    DropdownMenu(
-                        expanded = subCatExpanded,
-                        onDismissRequest = { subCatExpanded = false }
-                    ) {
-                        if (category.isNotEmpty()) {
-                            DropdownMenuItem(
-                                text = { Text("") },
-                                onClick = {
-                                    subCategory = ""
-                                    subCatExpanded = false
-                                }
-                            )
-                            subCategories.forEach { subCat ->
-                                DropdownMenuItem(
-                                    text = { Text(subCat) },
-                                    onClick = {
-                                        if (category.isNotEmpty()) {
-                                            subCategory = subCat
-                                            subCatExpanded = false
-                                        }
-                                    }
-                                )
-                            }
                         }
                     }
                 }
@@ -702,7 +657,6 @@ fun EventDetailsContent(
                                 title,
                                 description,
                                 category,
-                                subCategory,
                                 finalLocationType,
                                 finalLocation,
                                 visibility,

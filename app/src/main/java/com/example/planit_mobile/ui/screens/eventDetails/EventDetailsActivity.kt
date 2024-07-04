@@ -88,7 +88,6 @@ class EventDetailsActivity : ComponentActivity() {
                         viewModel.usersInEvent.collectAsState(initial = emptyList()).value
                     val isUserOrganizer = viewModel.isUserOrganizer.collectAsState(initial = false).value
                     val categories = viewModel.categoriesState.collectAsState(initial = emptyList()).value
-                    val subCategories = viewModel.subcategoriesState.collectAsState(initial = emptyList()).value
                     val userIDState = viewModel.userIDState.collectAsState(initial = null).value
                     val polls = viewModel.pollsState.collectAsState(initial = emptyList()).value
                     val messages = viewModel.messagesState.collectAsState(initial = emptyList()).value
@@ -126,10 +125,10 @@ class EventDetailsActivity : ComponentActivity() {
                                     leaveEvent = {
                                         viewModel.leaveEvent(eventId)
                                     },
-                                    editEvent = { name, description, category, subCategory, locationType,
+                                    editEvent = { name, description, category, locationType,
                                                   location, visibility, date, endDate, price, password ->
                                         viewModel.editEvent(
-                                            eventId, name, description, category, subCategory,
+                                            eventId, name, description, category,
                                             locationType, location, visibility, date, endDate, price,
                                             password
                                         )
@@ -138,10 +137,6 @@ class EventDetailsActivity : ComponentActivity() {
                                         viewModel.deleteEvent(eventId)
                                     },
                                     categories = categories,
-                                    onCategorySelected = { category ->
-                                        viewModel.getSubcategories(category)
-                                    },
-                                    subCategories = subCategories,
                                     updateUsersInEvent = {
                                         viewModel.getUsersInEventAndIsUserInEvent(eventId, true)
                                     },

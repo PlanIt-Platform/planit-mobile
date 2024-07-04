@@ -49,7 +49,6 @@ class EventDetailsViewModel(
     private val isUserOrganizerFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val eventDeleted : MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val categoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
-    private val subcategoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     private val userIDFlow: MutableStateFlow<Int?> = MutableStateFlow(null)
     private val pollsFlow: MutableStateFlow<List<PollModel>?> = MutableStateFlow(null)
     private val userInfo: MutableStateFlow<User?> = MutableStateFlow(null)
@@ -71,8 +70,6 @@ class EventDetailsViewModel(
         get() = eventDeleted.asStateFlow()
     val categoriesState: Flow<List<String>>
         get() = categoriesFlow.asStateFlow()
-    val subcategoriesState: Flow<List<String>>
-        get() = subcategoriesFlow.asStateFlow()
     val userIDState: Flow<Int?>
         get() = userIDFlow.asStateFlow()
     val pollsState: Flow<List<PollModel>?>
@@ -205,27 +202,11 @@ class EventDetailsViewModel(
         )
     }
 
-    fun getSubcategories(category: String) {
-        launchAndRequest(
-            request = {
-                val validURICategory = category.replace(" ", "-")
-                service.getSubcategories(validURICategory)
-            },
-            onSuccess = {
-                subcategoriesFlow.value = it
-            },
-            onFailure = {
-                errorStateFlow.value = errorMessage(it.message.toString())
-            },
-        )
-    }
-
     fun editEvent(
         eventID: Int,
         name: String,
         description: String?,
         category: String,
-        subCategory: String?,
         locationType: String?,
         location: String?,
         visibility: String,
@@ -243,7 +224,6 @@ class EventDetailsViewModel(
                     name,
                     description,
                     category,
-                    subCategory,
                     locationType,
                     location,
                     visibility,

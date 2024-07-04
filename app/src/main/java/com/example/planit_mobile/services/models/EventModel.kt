@@ -5,7 +5,6 @@ data class EventModel(
     val title: String,
     val description: String?,
     val category: String,
-    val subcategory: String?,
     val locationType: String?,
     val location: String?,
     val visibility: String,
