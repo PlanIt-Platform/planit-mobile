@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
-import com.example.planit_mobile.services.EventService
 import com.example.planit_mobile.services.UserService
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
 import com.example.planit_mobile.services.utils.launchAndRequest
@@ -19,26 +18,25 @@ import com.example.planit_mobile.ui.screens.common.Error
 
 class RegisterViewModel(
     private val userService: UserService,
-    private val eventService: EventService,
     private val sessionStorage: SessionDataStore,
 ) : ViewModel() {
 
     companion object {
-        fun factory(userService: UserService, eventService: EventService,sessionStorage: SessionDataStore) = viewModelFactory {
-            initializer { RegisterViewModel(userService, eventService, sessionStorage) }
+        fun factory(userService: UserService, sessionStorage: SessionDataStore) = viewModelFactory {
+            initializer { RegisterViewModel(userService, sessionStorage) }
         }
     }
 
     private val loadStateFlow: MutableStateFlow<LoadState<Int>> = MutableStateFlow(idle())
+    private val userCreationSuccessful: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
-    private val categoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
 
     val loadState: Flow<LoadState<Int>>
         get() = loadStateFlow.asStateFlow()
+    val userCreationSuccessfulState: Flow<Boolean>
+        get() = userCreationSuccessful.asStateFlow()
     val errorState: Flow<Error>
         get() = errorStateFlow.asStateFlow()
-    val categoriesState: Flow<List<String>>
-        get() = categoriesFlow.asStateFlow()
 
     fun register(username: String, name: String, email: String, password: String) {
         loadStateFlow.value = loading()
@@ -51,6 +49,7 @@ class RegisterViewModel(
                     userID = it.id,
                 )
                 loadStateFlow.value = step1()
+                userCreationSuccessful.value = true
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) }
         )
@@ -58,7 +57,7 @@ class RegisterViewModel(
 
     fun editUser(name: String, interests: List<String>, description: String) {
         launchAndAuthenticateRequest(
-            request = { userAccessToken, userRefreshToken, userId ->
+            request = { userAccessToken, userRefreshToken, _ ->
                 userService.editUser(userAccessToken, userRefreshToken, name, interests, description)
             },
             onSuccess = {
@@ -69,14 +68,12 @@ class RegisterViewModel(
         )
     }
 
-    fun getCategories() {
-        launchAndRequest(
-            request = { eventService.getCategories() },
-            onSuccess = {
-                categoriesFlow.value = it
-            },
-            onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
-        )
+    fun dismissUserCreationSuccess() {
+        userCreationSuccessful.value = false
+    }
+
+    fun setLoadStateToStep2(){
+        loadStateFlow.value = step2()
     }
 
     fun dismissError() {

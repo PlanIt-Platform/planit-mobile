@@ -6,10 +6,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
 import com.example.planit_mobile.domain.User
-import com.example.planit_mobile.services.EventService
 import com.example.planit_mobile.services.UserService
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
-import com.example.planit_mobile.services.utils.launchAndRequest
 import com.example.planit_mobile.ui.screens.common.LoadState
 import com.example.planit_mobile.ui.screens.common.errorMessage
 import com.example.planit_mobile.ui.screens.common.idle
@@ -24,13 +22,12 @@ import kotlinx.coroutines.launch
 
 class EditUserProfileViewModel (
     private val userService: UserService,
-    private val eventService: EventService,
     private val sessionStorage: SessionDataStore
 ) : ViewModel() {
 
     companion object {
-        fun factory(userService: UserService, eventService: EventService, sessionStorage: SessionDataStore) = viewModelFactory {
-            initializer { EditUserProfileViewModel(userService, eventService, sessionStorage) }
+        fun factory(userService: UserService, sessionStorage: SessionDataStore) = viewModelFactory {
+            initializer { EditUserProfileViewModel(userService, sessionStorage) }
         }
     }
 
@@ -39,7 +36,6 @@ class EditUserProfileViewModel (
         User(0, "", "", "", "", emptyList())
     )
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
-    private val categoriesFlow: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     private val logStateFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     val loadState: Flow<LoadState<Any>>
@@ -48,8 +44,6 @@ class EditUserProfileViewModel (
         get() = userInfoFlow.asStateFlow()
     val errorState: Flow<Error>
         get() = errorStateFlow.asStateFlow()
-    val categoriesState: Flow<List<String>>
-        get() = categoriesFlow.asStateFlow()
     val logState: Flow<Boolean>
         get() = logStateFlow.asStateFlow()
 
@@ -78,7 +72,7 @@ class EditUserProfileViewModel (
     fun editUser(name: String, interests: List<String>, description: String) {
         loadStateFlow.value = loading()
         launchAndAuthenticateRequest(
-            request = { userAccessToken, userRefreshToken, userId ->
+            request = { userAccessToken, userRefreshToken, _ ->
                 userService.editUser(userAccessToken, userRefreshToken, name, interests, description)
             },
             onSuccess = {
@@ -86,16 +80,6 @@ class EditUserProfileViewModel (
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
             sessionStorage = sessionStorage
-        )
-    }
-
-    fun getCategories() {
-        launchAndRequest(
-            request = { eventService.getCategories() },
-            onSuccess = {
-                categoriesFlow.value = it
-            },
-            onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
         )
     }
 

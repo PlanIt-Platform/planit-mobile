@@ -137,14 +137,16 @@ class HomeActivity : ComponentActivity() {
                                     },
                                     categories = categories,
                                     createEventRequested = { title, description, category,
-                                                             locationType, location, visibility,
-                                                             date, endDate, price, password ->
+                                                             locationType, location, latitude,
+                                                             longitude, visibility, date, endDate, price, password ->
                                         homeViewModel.createEvent(
                                             title,
                                             description,
                                             category,
                                             locationType,
                                             location,
+                                            latitude,
+                                            longitude,
                                             visibility,
                                             date,
                                             endDate,

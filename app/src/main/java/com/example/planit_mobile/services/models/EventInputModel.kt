@@ -19,6 +19,8 @@ data class EventInputModel(
     val category: String,
     val locationType: String?,
     val location: String?,
+    val latitude: String?,
+    val longitude: String?,
     val visibility: String?,
     val date: String,
     val endDate: String?,

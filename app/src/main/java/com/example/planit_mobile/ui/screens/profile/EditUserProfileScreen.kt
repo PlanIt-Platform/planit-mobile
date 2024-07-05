@@ -1,18 +1,31 @@
 package com.example.planit_mobile.ui.screens.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,16 +52,15 @@ import com.example.planit_mobile.ui.screens.common.Title
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditUserProfileScreen(
-    categories: List<String>,
     onBackRequested: () -> Unit,
     onEdit: (String, List<String>, String) -> Unit,
     userInfo: User
 ) {
     var name by remember(userInfo) { mutableStateOf(userInfo.name) }
     var description by remember(userInfo) { mutableStateOf(userInfo.description) }
-    var selectedInterests by remember(userInfo) { mutableStateOf(userInfo.interests) }
-
-    val scrollState = rememberLazyListState()
+    var interestInput by remember { mutableStateOf("") }
+    var interests by remember { mutableStateOf(userInfo.interests) }
+    var invalidInterest by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -73,115 +85,150 @@ fun EditUserProfileScreen(
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            LazyColumn (state = scrollState) {
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        Text(
-                            "Edit Your Profile Name",
-                            fontSize = 20.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(start = 5.dp, top = 10.dp)
-                        )
+            Column {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(2.dp)
+                ) {
+                    Text(
+                        "Edit Your Profile Name",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(start = 5.dp, top = 10.dp)
+                    )
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    TextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Name") },
+                        maxLines = 2,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    )
+                }
+
+                // Interests
+                Column (modifier = Modifier.padding(10.dp).fillMaxHeight(0.5f)) {
+                    TextField(
+                        value = interestInput,
+                        onValueChange = {
+                            interestInput = it
+                            invalidInterest = interestInput in interests
+                        },
+                        label = { Text("Interest") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = {
+                            if (interestInput.isNotBlank() && interestInput !in interests) {
+                                interests = interests + interestInput
+                                interestInput = ""
+                            }
+                        }),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                if (interestInput.isNotBlank() && interestInput !in interests) {
+                                    interests = interests + interestInput
+                                    interestInput = ""
+                                }
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add Interest")
+                            }
+                        },
+                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = "") }
+                    )
+                    if (invalidInterest) {
+                        Text("Interest is already in Interest List", color = Color.Red)
                     }
-
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(10.dp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
                     ) {
-                        TextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text("Name") },
-                            maxLines = 2,
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                imeAction = ImeAction.Done
-                            ),
-                            shape = MaterialTheme.shapes.small,
-                            modifier = Modifier.fillMaxWidth(0.8f)
-                        )
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        Text(
-                            "Interests",
-                            fontSize = 20.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(start = 5.dp)
-                        )
-                    }
-
-                    val interests = categories.filter { it != "Simple Meeting" }
-
-                    interests.forEach { category ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = category in selectedInterests,
-                                onCheckedChange = {
-                                    selectedInterests = if (category in selectedInterests) {
-                                        selectedInterests.filter { it != category }
-                                    } else {
-                                        selectedInterests + category
+                        Column (modifier = Modifier
+                            .verticalScroll(rememberScrollState(), true).fillMaxHeight()
+                        ) {
+                            interests.forEach { interest ->
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color.LightGray,
+                                            shape = RoundedCornerShape(16.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Row {
+                                        Text(
+                                            text = interest,
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                        IconButton(onClick = {
+                                            interests =
+                                                interests.filterNot { it == interest }
+                                        }) {
+                                            Icon(
+                                                Icons.Default.Close,
+                                                contentDescription = "Remove"
+                                            )
+                                        }
                                     }
                                 }
-                            )
-                            Text(category, color = Color.White)
+                                Spacer(modifier = Modifier.width(4.dp))
+                            }
                         }
                     }
+                }
 
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        Text(
-                            "Description",
-                            fontSize = 20.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.padding(start = 5.dp)
-                        )
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(2.dp)
+                ) {
+                    Text(
+                        "Description",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
 
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(10.dp)
-                    ) {
-                        TextField(
-                            value = description,
-                            onValueChange = { description = it },
-                            label = { Text("Description") },
-                            shape = MaterialTheme.shapes.small,
-                            modifier = Modifier.fillMaxWidth(0.8f)
-                        )
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    TextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Description") },
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    )
+                }
 
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(top = 5.dp, bottom = 30.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                onEdit(name, selectedInterests, description)
-                            },
-                            content = { Text("Submit") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally),
-                        )
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(top = 5.dp, bottom = 30.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            onEdit(name, interests, description)
+                        },
+                        content = { Text("Submit") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally),
+                    )
                 }
             }
         }
     }
-
 }

@@ -73,7 +73,7 @@ fun EventDetailsContent(
     isUserOrganizer: Boolean,
     leaveEvent: () -> Unit,
     editEvent: (
-        String, String?, String, String?, String?, String, String, String?, String, String
+        String, String?, String, String?, String?, String?, String?, String, String, String?, String, String
     ) -> Unit,
     deleteEvent: () -> Unit,
     categories: List<String>
@@ -100,14 +100,17 @@ fun EventDetailsContent(
     var currency by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    val initialLocation = LatLng(0.0, 0.0)
+    val initialLocation = if(eventDetails.latitude != null && eventDetails.longitude != null)
+        LatLng(eventDetails.latitude.toDouble(), eventDetails.longitude.toDouble())
+        else{ LatLng(0.0, 0.0) }
     var locationCoords by remember { mutableStateOf(initialLocation)}
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     var markerVisibility by remember { mutableStateOf(false) }
     var locationSearch by remember { mutableStateOf("") }
     var locationSwitchState by remember {
-        mutableStateOf(eventDetails.locationType != "Physical")
+        mutableStateOf((eventDetails.locationType != "Physical" && eventDetails.locationType != null))
     }
+    var successfulLocation by remember { mutableStateOf(false)}
 
     var catExpanded by remember { mutableStateOf(false) }
     var visibilityExpanded by remember { mutableStateOf(false) }
@@ -351,44 +354,44 @@ fun EventDetailsContent(
             //Location
             if(!editMode){
                 if (eventDetails.location != null && eventDetails.location != ""){
-                    if(eventDetails.locationType == "Physical"){
-                        DetailsTexts(title = "Location", text = eventDetails.location)
-                        var successfulLocation by remember { mutableStateOf(false)}
-                        try{
-                            val geocoder = Geocoder(context, Locale.getDefault())
-                            val locationName =
-                                geocoder.getFromLocationName(eventDetails.location, 1)
-                            if(locationName != null){
-                                val locationLatLng = locationName[0]
-                                location = locationLatLng.getAddressLine(0)
-                                locationCoords = LatLng(locationLatLng.latitude, locationLatLng.longitude)
-                            }
-                            successfulLocation = true
-                        } catch (e: Exception){
-                            Toast.makeText(context, "Location not found", Toast.LENGTH_SHORT).show()
-                        }
-                        if(successfulLocation){
-                            val cameraPositionState = rememberCameraPositionState {
-                                position = CameraPosition.fromLatLngZoom(locationCoords, 8f)
-                            }
-                            LaunchedEffect(cameraPositionState.isMoving) {
-                                if (!cameraPositionState.isMoving) {
-                                    columnScrollingEnabled = true
+                    when (eventDetails.locationType) {
+                        "Physical" -> {
+                            DetailsTexts(title = "Location", text = eventDetails.location)
+                            if( eventDetails.latitude != null && eventDetails.longitude != null ){
+                                val eventDetailsLocation = LatLng(
+                                    eventDetails.latitude.toDouble(),
+                                    eventDetails.longitude.toDouble()
+                                )
+                                val cameraPositionState = rememberCameraPositionState {
+                                    position = CameraPosition.fromLatLngZoom(eventDetailsLocation, 8f)
                                 }
+                                LaunchedEffect(cameraPositionState.isMoving) {
+                                    if (!cameraPositionState.isMoving) {
+                                        columnScrollingEnabled = true
+                                    }
+                                }
+                                MyGoogleMap(
+                                    viewOnlyMode = true,
+                                    cameraPositionState = cameraPositionState,
+                                    context = context,
+                                    locationCoords = eventDetailsLocation,
+                                    markerVisibility = true,
+                                    columnScrollingEnabled = { scroll ->
+                                        columnScrollingEnabled = scroll
+                                    }
+                                )
                             }
-                            MyGoogleMap(
-                                viewOnlyMode = true,
-                                cameraPositionState = cameraPositionState,
-                                context = context,
-                                locationCoords = locationCoords,
-                                markerVisibility = true,
-                                columnScrollingEnabled = { scroll -> columnScrollingEnabled = scroll }
+                            DetailsTexts(
+                                title = "Location Coordinates",
+                                text = "${eventDetails.latitude}, ${eventDetails.longitude}"
                             )
-                        } else {
-                            DetailsTexts(title = "Location", text = "")
                         }
-                    } else {
-                        DetailsTexts(title = "Event Link", text = eventDetails.location)
+                        "Online" -> {
+                            DetailsTexts(title = "Event Link", text = eventDetails.location)
+                        }
+                        else -> {
+                            DetailsTexts(title = "Location", text = "No location available")
+                        }
                     }
                 }
             } else {
@@ -427,8 +430,8 @@ fun EventDetailsContent(
                                 .padding(2.dp)
                                 .fillMaxWidth(0.9f)
                         )
-                    } else if (locationType == "Physical") {
-                        if(location != "" && location != null) markerVisibility = true
+                    } else {
+                        if(location != "") markerVisibility = true
                         val cameraPositionState = rememberCameraPositionState {
                             position = CameraPosition.fromLatLngZoom(initialLocation, 0.5f)
                         }
@@ -455,9 +458,11 @@ fun EventDetailsContent(
                                         locationCoords = LatLng(locationLatLng.latitude, locationLatLng.longitude)
                                         markerVisibility = true
                                         cameraPositionState.position = CameraPosition.fromLatLngZoom(locationCoords, 15f)
+                                        successfulLocation = true
                                     }
                                 } catch (e: Exception){
                                     Toast.makeText(context, "Location not found", Toast.LENGTH_SHORT).show()
+                                    successfulLocation = false
                                 }
                             }),
                             singleLine = true
@@ -469,7 +474,7 @@ fun EventDetailsContent(
                             locationCoords = locationCoords,
                             markerVisibility = markerVisibility,
                             columnScrollingEnabled = { scroll -> columnScrollingEnabled = scroll },
-                            locationChange = { locat -> location = locat },
+                            locationChange = { locat -> location = locat; successfulLocation = true },
                             locationCoordsChange = { coords -> locationCoords = coords },
                             markerVisibilityChange = { marker -> markerVisibility = marker }
                         )
@@ -479,11 +484,17 @@ fun EventDetailsContent(
                             fontSize = 18.sp,
                             modifier = Modifier.padding(5.dp)
                         )
+                        Text(
+                            text = "Selected coordinates: ${locationCoords.latitude}, ${locationCoords.longitude}",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(5.dp)
+                        )
                         Button(
                             onClick = {
                                 location = ""
                                 locationSearch = ""
-                                locationCoords = initialLocation
+                                locationCoords = LatLng(0.0, 0.0)
                                 markerVisibility = false
                             }
                         ) {
@@ -653,12 +664,20 @@ fun EventDetailsContent(
                                 }
                             val finalLocationType =
                                 if (finalLocation == null) null else locationType
+                            val (latitude, longitude) =
+                                if (locationType == "Physical" && location.isNotEmpty() && successfulLocation) {
+                                    Pair(locationCoords.latitude.toString(), locationCoords.longitude.toString())
+                                } else {
+                                    Pair(null, null)
+                                }
                             editEvent(
                                 title,
                                 description,
                                 category,
                                 finalLocationType,
                                 finalLocation,
+                                latitude,
+                                longitude,
                                 visibility,
                                 startDateTime,
                                 endDateTime,
