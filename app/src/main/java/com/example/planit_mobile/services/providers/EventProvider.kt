@@ -5,6 +5,7 @@ import com.example.planit_mobile.services.models.EventInputModel
 import com.example.planit_mobile.services.models.CreateEventOutputModel
 import com.example.planit_mobile.services.models.CreatePollOutputModel
 import com.example.planit_mobile.services.models.EventModel
+import com.example.planit_mobile.services.models.NearbyEventsResult
 import com.example.planit_mobile.services.models.PollModel
 import com.example.planit_mobile.services.models.SearchEventsResult
 import com.example.planit_mobile.services.models.SuccessMessage
@@ -12,6 +13,7 @@ import com.example.planit_mobile.services.models.UsersInEventResult
 import com.example.planit_mobile.services.utils.ApiRequests
 import com.example.planit_mobile.services.utils.PathTemplates.CREATE_EVENT
 import com.example.planit_mobile.services.utils.PathTemplates.GET_CATEGORIES
+import com.example.planit_mobile.services.utils.PathTemplates.findNearbyEventsPath
 import com.example.planit_mobile.services.utils.PathTemplates.getAssignUserRolePath
 import com.example.planit_mobile.services.utils.PathTemplates.getCreatePollPath
 import com.example.planit_mobile.services.utils.PathTemplates.getDeleteEventPath
@@ -23,7 +25,6 @@ import com.example.planit_mobile.services.utils.PathTemplates.getLeaveEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getPollPath
 import com.example.planit_mobile.services.utils.PathTemplates.getPollsPath
 import com.example.planit_mobile.services.utils.PathTemplates.getRemoveUserRolePath
-import com.example.planit_mobile.services.utils.PathTemplates.getSubcategoriesPath
 import com.example.planit_mobile.services.utils.PathTemplates.getUsersInEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getVotePollPath
 import com.example.planit_mobile.services.utils.PathTemplates.searchEventPath
@@ -100,6 +101,20 @@ class EventProvider(
     ): SearchEventsResult =
         ApiRequests(client, gson).getRequest(
             searchEventPath(query, limit, offset), userAccessToken, userRefreshToken
+        )
+
+    override suspend fun findNearbyEvents(
+        userAccessToken: String,
+        userRefreshToken: String,
+        latitude: Double,
+        longitude: Double,
+        radius: Int,
+        limit: Int?
+    ): NearbyEventsResult =
+        ApiRequests(client, gson).getRequest(
+            findNearbyEventsPath(latitude, longitude, radius, limit),
+            userAccessToken,
+            userRefreshToken
         )
 
     override suspend fun joinEvent(

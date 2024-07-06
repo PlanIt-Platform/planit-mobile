@@ -27,6 +27,7 @@ import com.example.planit_mobile.ui.screens.profile.EditUserProfileActivity
 import com.example.planit_mobile.ui.screens.profile.UserProfileScreen
 import com.example.planit_mobile.ui.screens.profile.UserProfileViewModel
 import com.example.planit_mobile.ui.screens.eventDetails.EventDetailsActivity
+import com.example.planit_mobile.ui.screens.nearMe.NearMeActivity
 import com.example.planit_mobile.ui.screens.searchEvent.SearchEventScreen
 import com.example.planit_mobile.ui.screens.searchEvent.SearchEventViewModel
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
@@ -234,6 +235,9 @@ class HomeActivity : ComponentActivity() {
                                 },
                                 onEventsRequested = {
                                     lifecycleScope.launch {eventViewModel.refreshData()}
+                                },
+                                onNearMeRequested = {
+                                    NearMeActivity.navigateTo(this@HomeActivity)
                                 },
                                 onSearch = { searchQuery ->
                                     eventViewModel.searchEvents(searchQuery, 0)

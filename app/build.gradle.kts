@@ -6,7 +6,7 @@ plugins {
 }
 android {
     namespace = "com.example.planit_mobile"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.planit_mobile"
@@ -78,6 +78,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("androidx.compose.ui:ui-android:1.5.4")
+    implementation("androidx.core:core-ktx:+")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")

@@ -19,7 +19,6 @@ object PathTemplates {
     private const val GET_EVENT = "${PLANIT_API_URL}/event/{id}"
     private const val USERS_IN_EVENT = "${PLANIT_API_URL}/event/{id}/users"
     const val GET_CATEGORIES = "${PLANIT_API_URL}/event/categories"
-    private const val GET_SUBCATEGORIES = "${PLANIT_API_URL}/event/categories/{category}/subcategories"
     private const val JOIN_EVENT = "${PLANIT_API_URL}/event/{id}/join"
     private const val LEAVE_EVENT = "${PLANIT_API_URL}/event/{id}/leave"
     private const val DELETE_EVENT = "${PLANIT_API_URL}/event/{id}"
@@ -44,9 +43,16 @@ object PathTemplates {
         return input + limitInput + offsetInput
     }
 
-
-    fun getSubcategoriesPath(category: String): String =
-        GET_SUBCATEGORIES.replace("{category}", category)
+    fun findNearbyEventsPath(
+        latitude: Double,
+        longitude: Double,
+        radius: Int,
+        limit: Int?
+    ): String {
+        val path = "${PLANIT_API_URL}/events/${radius}/${latitude}/${longitude}"
+        val limitInput = if (limit != null) "?limit=${limit}" else ""
+        return path + limitInput
+    }
 
     fun getJoinEventPath(id: Int): String = JOIN_EVENT.replace("{id}", "$id")
 

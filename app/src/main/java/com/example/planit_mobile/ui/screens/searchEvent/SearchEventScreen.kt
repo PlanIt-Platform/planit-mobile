@@ -62,6 +62,7 @@ fun SearchEventScreen(
     onProfileRequested: () -> Unit,
     onHomeRequested: () -> Unit,
     onEventsRequested: () -> Unit,
+    onNearMeRequested: () -> Unit,
     onSearch: (String?) -> Unit,
     events: List<SearchEventResult>,
     categories: List<String>,
@@ -120,7 +121,7 @@ fun SearchEventScreen(
                     isExpanded = isExpanded,
                     setExpanded = { isExpanded = !isExpanded }
                 )
-                if (!isExpanded) FilterSettings()
+                if (!isExpanded) NearMe(onNearMeRequested)
             }
             if (categories.isNotEmpty()) {
                 Box {
@@ -218,16 +219,14 @@ fun SearchBarAnimation(
 }
 
 @Composable
-fun FilterSettings(){
+fun NearMe(onNearMeRequested: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
         IconButton(
-            onClick = {
-                // TODO
-            }
+            onClick = {onNearMeRequested()},
         ) {
             Icon(
                 painter = painterResource(id = android.R.drawable.ic_dialog_map),
@@ -297,6 +296,7 @@ fun SearchEventScreenPreview() {
         onProfileRequested = { },
         onHomeRequested = { },
         onEventsRequested = { },
+        onNearMeRequested = { },
         onSearch = { },
         events = emptyList(),
         categories = emptyList(),

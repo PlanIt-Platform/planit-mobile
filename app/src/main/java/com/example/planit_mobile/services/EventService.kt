@@ -3,6 +3,7 @@ package com.example.planit_mobile.services
 import com.example.planit_mobile.services.models.CreateEventOutputModel
 import com.example.planit_mobile.services.models.CreatePollOutputModel
 import com.example.planit_mobile.services.models.EventModel
+import com.example.planit_mobile.services.models.NearbyEventsResult
 import com.example.planit_mobile.services.models.PollModel
 import com.example.planit_mobile.services.models.PollOption
 import com.example.planit_mobile.services.models.SearchEventsResult
@@ -83,6 +84,23 @@ interface EventService {
         limit: Int?,
         offset: Int?
     ) : SearchEventsResult
+
+    /**
+     * Finds nearby events based on the provided location.
+     * @param latitude The latitude of the location to search from.
+     * @param longitude The longitude of the location to search from.
+     * @param radius The radius of the search.
+     * @param limit The maximum number of events to return.
+     * @return The nearby events.
+     */
+    suspend fun findNearbyEvents(
+        userAccessToken: String,
+        userRefreshToken: String,
+        latitude: Double,
+        longitude: Double,
+        radius: Int,
+        limit: Int?
+    ): NearbyEventsResult
 
     /**
      * Joins the event associated with the given ID.
