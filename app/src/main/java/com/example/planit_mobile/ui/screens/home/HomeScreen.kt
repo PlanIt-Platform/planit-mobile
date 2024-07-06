@@ -56,7 +56,7 @@ fun HomeScreen(
     onEventsRequested: () -> Unit,
     categories: List<String>,
     createEventRequested : (
-        String, String, String, String?, String?, String, String, String, String, String
+        String, String, String, String?, String?, String?, String?, String, String, String, String, String
     ) -> Unit,
     eventCreatedPopUp : Boolean,
     eventCreatedMessage : String,
@@ -136,8 +136,8 @@ fun HomeScreen(
             Dialog(onDismissRequest = { showDialog = false }) {
                 Box (
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .fillMaxHeight(0.82f)
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.85f)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color(39, 62, 73, 255))
                 ) {
@@ -198,7 +198,7 @@ fun PreviewUserProfileScreen() {
         onHomeRequested = {},
         onEventsRequested = {},
         categories = listOf("Simple Meeting", "Birthday Party", "Wedding"),
-        createEventRequested = { _, _, _, _, _, _, _, _, _, _ -> },
+        createEventRequested = { _, _, _, _, _, _, _, _, _, _, _, _ -> },
         eventCreatedPopUp = false,
         eventCreatedMessage = "",
         userEvents = UserEventsResult(

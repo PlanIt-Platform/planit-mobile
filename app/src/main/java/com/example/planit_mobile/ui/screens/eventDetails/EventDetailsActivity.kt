@@ -50,11 +50,6 @@ class EventDetailsActivity : ComponentActivity() {
         val eventId = intent.getIntExtra(EXTRA_EVENT_ID, 0)
         val visibility = intent.getStringExtra(EXTRA_VISIBILITY)
 
-        // If the visibility is not known, make a request to find it out
-        if (visibility == null) {
-            // TODO: Make a request to find out the visibility
-        }
-
         viewModel.listenForMessages(eventId)
 
         lifecycleScope.launch {
@@ -80,17 +75,24 @@ class EventDetailsActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     viewModel.getCategories()
-                    val loadState = viewModel.loadState.collectAsState(initial = idle()).value
-                    val isUserInEvent = viewModel.isUserInEvent.collectAsState(initial = false).value
+                    val loadState =
+                        viewModel.loadState.collectAsState(initial = idle()).value
+                    val isUserInEvent =
+                        viewModel.isUserInEvent.collectAsState(initial = false).value
                     val userErrorMessage =
                         viewModel.errorState.collectAsState(initial = Error("")).value.message
                     val usersInEvent =
                         viewModel.usersInEvent.collectAsState(initial = emptyList()).value
-                    val isUserOrganizer = viewModel.isUserOrganizer.collectAsState(initial = false).value
-                    val categories = viewModel.categoriesState.collectAsState(initial = emptyList()).value
-                    val userIDState = viewModel.userIDState.collectAsState(initial = null).value
-                    val polls = viewModel.pollsState.collectAsState(initial = emptyList()).value
-                    val messages = viewModel.messagesState.collectAsState(initial = emptyList()).value
+                    val isUserOrganizer =
+                        viewModel.isUserOrganizer.collectAsState(initial = false).value
+                    val categories =
+                        viewModel.categoriesState.collectAsState(initial = emptyList()).value
+                    val userIDState =
+                        viewModel.userIDState.collectAsState(initial = null).value
+                    val polls =
+                        viewModel.pollsState.collectAsState(initial = emptyList()).value
+                    val messages =
+                        viewModel.messagesState.collectAsState(initial = emptyList()).value
 
                     if(loadState == loading()){
                         LoadingScreen(
@@ -125,12 +127,13 @@ class EventDetailsActivity : ComponentActivity() {
                                     leaveEvent = {
                                         viewModel.leaveEvent(eventId)
                                     },
-                                    editEvent = { name, description, category, locationType,
-                                                  location, visibility, date, endDate, price, password ->
+                                    editEvent = { name, description, category, locationType, location,
+                                                  latitude, longitude, visibility, date, endDate,
+                                                  price, password ->
                                         viewModel.editEvent(
                                             eventId, name, description, category,
-                                            locationType, location, visibility, date, endDate, price,
-                                            password
+                                            locationType, location, latitude, longitude, visibility,
+                                            date, endDate, price, password
                                         )
                                     },
                                     deleteEvent = {

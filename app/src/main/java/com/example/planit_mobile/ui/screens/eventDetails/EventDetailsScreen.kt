@@ -45,7 +45,7 @@ fun EventDetailsScreen(
     isUserOrganizer : Boolean,
     leaveEvent: () -> Unit,
     editEvent: (
-        String, String?, String, String?, String?, String, String, String?, String, String
+        String, String?, String, String?, String?, String?, String?, String, String, String?, String, String
     ) -> Unit,
     deleteEvent: () -> Unit,
     categories: List<String>,
@@ -111,9 +111,9 @@ fun EventDetailsScreen(
                     isUserOrganizer = isUserOrganizer,
                     leaveEvent = {leaveEvent()},
                     editEvent = { title, description, category, locationType,
-                                  location, visibility, date, endDate, price, password ->
+                                  location, latitude, longitude, visibility, date, endDate, price, password ->
                         editEvent(title, description, category, locationType,
-                            location, visibility, date, endDate, price, password)
+                            location, latitude, longitude, visibility, date, endDate, price, password)
                     },
                     deleteEvent = {deleteEvent()},
                     categories = categories

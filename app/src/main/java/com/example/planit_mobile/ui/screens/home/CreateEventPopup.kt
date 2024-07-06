@@ -63,7 +63,7 @@ fun CreateEventPopup(
     onDismiss: (Boolean) -> Unit,
     categories: List<String>,
     createEventRequested: (
-        String, String, String, String?, String?, String, String, String, String, String
+        String, String, String, String?, String?, String?, String?, String, String, String, String, String
     ) -> Unit,
     eventCreatedPopUp: Boolean
 ) {
@@ -88,6 +88,7 @@ fun CreateEventPopup(
     }
     var markerVisibility by remember { mutableStateOf(false) }
     var locationSearch by remember { mutableStateOf("") }
+    var successfulLocation by remember { mutableStateOf(false)}
     var columnScrollingEnabled by remember { mutableStateOf(true) }
 
     var startDateTime by remember { mutableStateOf("") }
@@ -349,14 +350,14 @@ fun CreateEventPopup(
             Column {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.7f),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         "Location Type",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp
+                        fontSize = 18.sp
                     )
                     Switch(
                         checked = locationSwitchState,
@@ -369,7 +370,7 @@ fun CreateEventPopup(
                     Text(
                         locationType,
                         color = Color.White,
-                        fontSize = 12.sp,
+                        fontSize = 15.sp,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -402,9 +403,11 @@ fun CreateEventPopup(
                                     locationCoords = LatLng(locationLatLng.latitude, locationLatLng.longitude)
                                     markerVisibility = true
                                     cameraPositionState.position = CameraPosition.fromLatLngZoom(locationCoords, 15f)
+                                    successfulLocation = true
                                 }
                             } catch (e: Exception){
                                 Toast.makeText(context, "Location not found", Toast.LENGTH_SHORT).show()
+                                successfulLocation = false
                             }
                         }),
                         singleLine = true
@@ -416,12 +419,18 @@ fun CreateEventPopup(
                         locationCoords = locationCoords,
                         markerVisibility = markerVisibility,
                         columnScrollingEnabled = { scroll -> columnScrollingEnabled = scroll },
-                        locationChange = { locat -> location = locat },
+                        locationChange = { locat -> location = locat; successfulLocation = true },
                         locationCoordsChange = { coords -> locationCoords = coords },
                         markerVisibilityChange = { marker -> markerVisibility = marker }
                     )
                     Text(
                         text = "Selected location: $location",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(5.dp)
+                    )
+                    Text(
+                        text = "Selected coordinates: ${locationCoords.latitude}, ${locationCoords.longitude}",
                         color = Color.White,
                         fontSize = 18.sp,
                         modifier = Modifier.padding(5.dp)
@@ -538,10 +547,16 @@ fun CreateEventPopup(
                             if(locationLink == "")null else locationLink
                         }
                     val finalLocationType = if (finalLocation == null) null else locationType
+                    val (latitude, longitude) =
+                        if (locationType == "Physical" && location.isNotEmpty() && successfulLocation) {
+                            Pair(locationCoords.latitude.toString(), locationCoords.longitude.toString())
+                        } else {
+                            Pair(null, null)
+                        }
                     createEventRequested(
                         eventName, eventDescription, selectedCategory,
-                        finalLocationType, finalLocation, selectedVisibility, startDateTime,
-                        endDateTime, price, password
+                        finalLocationType, finalLocation, latitude, longitude, selectedVisibility,
+                        startDateTime, endDateTime, price, password
                     )
                 },
                 enabled = eventName.isNotEmpty() && selectedCategory.isNotEmpty()
@@ -556,8 +571,9 @@ fun CreateEventPopup(
     if (eventCreatedPopUp) {
         //clear all fields
         eventName = ""; eventDescription = ""; selectedCategory = ""; locationType = ""
-        location = ""; selectedVisibility = ""; startDateTime = ""; endDateTime = ""; amount = ""
-        currency = ""; password = ""
+        location = ""; locationCoords = LatLng(0.0,0.0);
+        selectedVisibility = ""; startDateTime = ""; endDateTime = ""; amount = ""; currency = ""
+        password = ""
 
         onDismiss(false)
     }

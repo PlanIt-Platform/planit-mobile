@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.planit_mobile.PlanItDependencyProvider
 import com.example.planit_mobile.ui.screens.auth.login.LoginActivity
 import com.example.planit_mobile.ui.screens.auth.register.RegisterActivity
@@ -41,8 +42,10 @@ class GuestActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            if(viewModel.isLogged()){
-                HomeActivity.navigateTo(this@GuestActivity)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                if (viewModel.isLogged()) {
+                    HomeActivity.navigateTo(this@GuestActivity)
+                }
             }
         }
 

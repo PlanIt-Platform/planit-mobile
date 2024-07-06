@@ -43,6 +43,8 @@ class EventProvider(
         category: String,
         locationType: String?,
         location: String?,
+        latitude: String?,
+        longitude: String?,
         visibility: String?,
         date: String,
         endDate: String?,
@@ -55,6 +57,8 @@ class EventProvider(
             category,
             locationType,
             location,
+            latitude,
+            longitude,
             visibility,
             date,
             endDate,
@@ -100,7 +104,9 @@ class EventProvider(
         offset: Int?
     ): SearchEventsResult =
         ApiRequests(client, gson).getRequest(
-            searchEventPath(query, limit, offset), userAccessToken, userRefreshToken
+            searchEventPath(query, limit, offset),
+            userAccessToken,
+            userRefreshToken
         )
 
     override suspend fun findNearbyEvents(
@@ -152,19 +158,21 @@ class EventProvider(
         )
 
     override suspend fun editEvent(
-    userAccessToken: String,
-    userRefreshToken: String,
-    eventID: Int,
-    title: String,
-    description: String?,
-    category: String,
-    locationType: String?,
-    location: String?,
-    visibility: String,
-    date: String,
-    endDate: String?,
-    price: String,
-    password: String
+        userAccessToken: String,
+        userRefreshToken: String,
+        eventID: Int,
+        title: String,
+        description: String?,
+        category: String,
+        locationType: String?,
+        location: String?,
+        latitude: String?,
+        longitude: String?,
+        visibility: String,
+        date: String,
+        endDate: String?,
+        price: String,
+        password: String
     ): SuccessMessage {
         val data = EventInputModel(
             title,
@@ -172,6 +180,8 @@ class EventProvider(
             category,
             locationType,
             location,
+            latitude,
+            longitude,
             visibility,
             date,
             endDate,
