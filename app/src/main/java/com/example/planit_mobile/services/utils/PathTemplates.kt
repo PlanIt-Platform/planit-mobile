@@ -1,5 +1,6 @@
 package com.example.planit_mobile.services.utils
 
+
 object PathTemplates {
     const val PLANIT_API_URL = "http://10.0.2.2:1904/api-planit"
 
@@ -35,12 +36,15 @@ object PathTemplates {
     fun getEventPath(id: Int): String = GET_EVENT.replace("{id}", "$id")
 
     fun searchEventPath(query: String?, limit: Int?, offset: Int?): String {
-        val input = if (query != null) "${PLANIT_API_URL}/events?searchInput=${query}"
+        val formattedQuery = query?.replace(" ", "+")
+        val input = if (formattedQuery != null) "${PLANIT_API_URL}/events?searchInput=${formattedQuery}"
         else "${PLANIT_API_URL}/events?"
         val limitInput =
             if(query != null) "&" else "" + if (limit != null) "limit=${limit}" else ""
         val offsetInput =
-            if(limit != null || query != null) "&" else ""  + if (offset != null) "offset=${offset}" else ""
+            if(limit != null || query != null) {
+                "&" + if (offset != null) "offset=${offset}" else ""
+            } else ""  + if (offset != null) "offset=${offset}" else ""
         return input + limitInput + offsetInput
     }
 

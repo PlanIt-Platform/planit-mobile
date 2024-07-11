@@ -1,6 +1,7 @@
 package com.example.planit_mobile.ui.screens.searchEvent
 
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -68,10 +71,13 @@ fun SearchEventScreen(
     events: List<SearchEventResult>,
     categories: List<String>,
     onEventClick: (SearchEventResult) -> Unit,
-    searchEventCode: (String) -> Unit
+    searchEventCode: (String) -> Unit,
+    getMoreEvents: (String?, Int) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var search by remember { mutableStateOf("") }
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -120,13 +126,13 @@ fun SearchEventScreen(
                 SearchBarAnimation(
                     onSearch = onSearch,
                     isExpanded = isExpanded,
-                    setExpanded = { isExpanded = !isExpanded }
+                    setExpanded = { isExpanded = !isExpanded },
+                    onTextChange = { search = it }
                 )
                 if (!isExpanded) NearMe(onNearMeRequested)
             }
             if (categories.isNotEmpty()) {
                 Box {
-                    var selectedCategory by remember { mutableStateOf<String?>(null) }
                     LazyRow {
                         items(categories) { category ->
                             Box(
@@ -160,11 +166,19 @@ fun SearchEventScreen(
                 modifier = Modifier
                     .weight(1f)
             ) {
-                LazyColumn {
-                    items(events) { event ->
+                val listState = rememberLazyListState()
+
+                LazyColumn(state = listState) {
+                    itemsIndexed(events) { index, event ->
                         EventCard(event = event, onEventClick = onEventClick)
+                        if(index == events.size - 1){
+                            if(selectedCategory != "") getMoreEvents(selectedCategory, events.size)
+                            else if (search != "") getMoreEvents(search, events.size)
+                            else getMoreEvents(null, events.size)
+                        }
                     }
                 }
+
             }
             if(showDialog){
                 SearchEventDialog(
@@ -180,7 +194,8 @@ fun SearchEventScreen(
 fun SearchBarAnimation(
     onSearch: (String) -> Unit,
     isExpanded: Boolean,
-    setExpanded: () -> Unit
+    setExpanded: () -> Unit,
+    onTextChange: (String) -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
     var finalSearchText by remember { mutableStateOf("") }
@@ -195,7 +210,9 @@ fun SearchBarAnimation(
                 val limitedText = if (textLimitExceeded) searchText.substring(0, 20) else searchText
                 BasicTextField(
                     value = limitedText,
-                    onValueChange = { searchText = it },
+                    onValueChange = {
+                        searchText = it
+                    },
                     textStyle = TextStyle(color = Color.White),
                     modifier = Modifier
                         .animateContentSize()
@@ -210,7 +227,11 @@ fun SearchBarAnimation(
                         .padding(vertical = 14.dp, horizontal = 20.dp),
                     singleLine = true,
                     cursorBrush = SolidColor(Color.White),
-                    keyboardActions = KeyboardActions(onDone = { finalSearchText = searchText; onSearch(finalSearchText) })
+                    keyboardActions = KeyboardActions(onDone = {
+                        finalSearchText = searchText
+                        onSearch(finalSearchText)
+                        onTextChange(finalSearchText)
+                    })
                 )
             }
         }
@@ -320,6 +341,7 @@ fun SearchEventScreenPreview() {
         events = emptyList(),
         categories = emptyList(),
         onEventClick = { },
-        searchEventCode = { }
+        searchEventCode = { },
+        getMoreEvents = { _, _ -> }
     )
 }

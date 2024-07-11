@@ -1,5 +1,6 @@
 package com.example.planit_mobile.ui.screens.searchEvent
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -86,6 +87,21 @@ class SearchEventViewModel(
             },
             onSuccess = {
                 eventDetailsFlow.value = it
+            },
+            onFailure = {
+                errorStateFlow.value = errorMessage(it.message.toString())
+            },
+            sessionStorage = sessionStorage
+        )
+    }
+
+    fun getMoreEvents(query: String?, offset: Int) {
+        launchAndAuthenticateRequest(
+            request = { userAccessToken, userRefreshToken, _ ->
+                service.searchEvents(userAccessToken, userRefreshToken, query, 10, offset)
+            },
+            onSuccess = {
+                if(eventsFlow.value != it.events){ eventsFlow.value += it.events }
             },
             onFailure = {
                 errorStateFlow.value = errorMessage(it.message.toString())

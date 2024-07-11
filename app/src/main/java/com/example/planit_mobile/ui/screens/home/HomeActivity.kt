@@ -267,6 +267,9 @@ class HomeActivity : ComponentActivity() {
                                 },
                                 searchEventCode = { code ->
                                     eventViewModel.joinEventWithCode(code)
+                                },
+                                getMoreEvents = { query, offset ->
+                                    eventViewModel.getMoreEvents(query, offset)
                                 }
                             )
                             ErrorPopup(
