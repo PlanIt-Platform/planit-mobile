@@ -30,6 +30,7 @@ object PathTemplates {
     private const val CREATE_POLL = "${PLANIT_API_URL}/event/{id}/poll"
     private const val POLL = "${PLANIT_API_URL}/event/{eventId}/poll/{pollId}"
     private const val VOTE_POLL = "${PLANIT_API_URL}/event/{eventId}/poll/{pollId}/vote/{optionId}"
+    private const val JOIN_EVENT_WITH_CODE = "${PLANIT_API_URL}/event/{code}"
 
     fun getEventPath(id: Int): String = GET_EVENT.replace("{id}", "$id")
 
@@ -90,5 +91,7 @@ object PathTemplates {
         VOTE_POLL.replace("{eventId}", "$eventId")
             .replace("{pollId}", "$pollId")
             .replace("{optionId}", "$optionId")
+
+    fun getJoinEventWithCodePath(code: String): String = JOIN_EVENT_WITH_CODE.replace("{code}", code)
 
 }

@@ -5,6 +5,7 @@ import com.example.planit_mobile.services.models.EventInputModel
 import com.example.planit_mobile.services.models.CreateEventOutputModel
 import com.example.planit_mobile.services.models.CreatePollOutputModel
 import com.example.planit_mobile.services.models.EventModel
+import com.example.planit_mobile.services.models.JoinEventWithCodeModel
 import com.example.planit_mobile.services.models.NearbyEventsResult
 import com.example.planit_mobile.services.models.PollModel
 import com.example.planit_mobile.services.models.SearchEventsResult
@@ -20,6 +21,7 @@ import com.example.planit_mobile.services.utils.PathTemplates.getDeleteEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getEditEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getJoinEventPath
+import com.example.planit_mobile.services.utils.PathTemplates.getJoinEventWithCodePath
 import com.example.planit_mobile.services.utils.PathTemplates.getKickUserFromEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getLeaveEventPath
 import com.example.planit_mobile.services.utils.PathTemplates.getPollPath
@@ -297,6 +299,19 @@ class EventProvider(
     ): SuccessMessage {
         return ApiRequests(client, gson).putRequest(
             getVotePollPath(eventId, pollId, optionId),
+            "{}",
+            userAccessToken,
+            userRefreshToken
+        )
+    }
+
+    override suspend fun joinEventWithCode(
+        userAccessToken: String,
+        userRefreshToken: String,
+        code: String
+    ): JoinEventWithCodeModel {
+        return ApiRequests(client, gson).postRequest(
+            getJoinEventWithCodePath(code),
             "{}",
             userAccessToken,
             userRefreshToken

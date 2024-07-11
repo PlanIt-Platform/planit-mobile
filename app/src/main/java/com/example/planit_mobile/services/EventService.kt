@@ -3,6 +3,7 @@ package com.example.planit_mobile.services
 import com.example.planit_mobile.services.models.CreateEventOutputModel
 import com.example.planit_mobile.services.models.CreatePollOutputModel
 import com.example.planit_mobile.services.models.EventModel
+import com.example.planit_mobile.services.models.JoinEventWithCodeModel
 import com.example.planit_mobile.services.models.NearbyEventsResult
 import com.example.planit_mobile.services.models.PollModel
 import com.example.planit_mobile.services.models.PollOption
@@ -215,5 +216,11 @@ interface EventService {
         pollId: Int,
         optionId: Int
     ): SuccessMessage
+
+    suspend fun joinEventWithCode(
+        userAccessToken: String,
+        userRefreshToken: String,
+        code: String
+    ): JoinEventWithCodeModel
 
 }

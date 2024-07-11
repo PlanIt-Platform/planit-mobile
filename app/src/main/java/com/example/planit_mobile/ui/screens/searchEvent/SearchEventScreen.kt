@@ -68,7 +68,7 @@ fun SearchEventScreen(
     events: List<SearchEventResult>,
     categories: List<String>,
     onEventClick: (SearchEventResult) -> Unit,
-    searchEventCode: (String?) -> Unit
+    searchEventCode: (String) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
