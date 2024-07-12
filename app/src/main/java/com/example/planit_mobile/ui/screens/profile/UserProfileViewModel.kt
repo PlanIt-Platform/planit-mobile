@@ -7,9 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
 import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.services.UserService
-import com.example.planit_mobile.services.utils.executeRequest
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
-import com.example.planit_mobile.services.utils.launchAndRequest
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.LoadState
 import com.example.planit_mobile.ui.screens.common.errorMessage

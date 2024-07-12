@@ -6,7 +6,6 @@ import com.example.planit_mobile.services.models.EventModel
 import com.example.planit_mobile.services.models.JoinEventWithCodeModel
 import com.example.planit_mobile.services.models.NearbyEventsResult
 import com.example.planit_mobile.services.models.PollModel
-import com.example.planit_mobile.services.models.PollOption
 import com.example.planit_mobile.services.models.SearchEventsResult
 import com.example.planit_mobile.services.models.SuccessMessage
 import com.example.planit_mobile.services.models.UsersInEventResult
@@ -18,13 +17,11 @@ interface EventService {
      * @param title The title of the new event.
      * @param description The description of the new event.
      * @param category The category of the new event.
-     * @param subcategory The subcategory of the new event.
      * @param location The location of the new event.
      * @param visibility The visibility of the new event.
      * @param date The date of the new event.
      * @param endDate The end date of the new event.
      * @param price The price of the new event.
-     * @param userID The ID of the user creating the event.
      * @return containing the ID of the newly created event, its title and a status message.
      */
     suspend fun createEvent(

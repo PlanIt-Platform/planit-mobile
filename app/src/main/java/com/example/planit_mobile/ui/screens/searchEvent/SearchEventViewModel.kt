@@ -1,8 +1,6 @@
 package com.example.planit_mobile.ui.screens.searchEvent
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
@@ -15,9 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.planit_mobile.ui.screens.common.Error
-import com.example.planit_mobile.ui.screens.common.idle
-import com.example.planit_mobile.ui.screens.common.loaded
-import kotlinx.coroutines.launch
 
 class SearchEventViewModel(
     private val service: EventService,

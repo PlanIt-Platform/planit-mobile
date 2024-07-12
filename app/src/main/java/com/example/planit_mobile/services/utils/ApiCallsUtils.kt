@@ -1,6 +1,5 @@
 package com.example.planit_mobile.services.utils
 
-import android.util.Log
 import com.example.planit_mobile.services.ErrorResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.suspendCancellableCoroutine

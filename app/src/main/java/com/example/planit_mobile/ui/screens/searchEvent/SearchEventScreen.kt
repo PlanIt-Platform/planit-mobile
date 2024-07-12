@@ -1,7 +1,6 @@
 package com.example.planit_mobile.ui.screens.searchEvent
 
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -77,7 +76,7 @@ fun SearchEventScreen(
     var isExpanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
-    var search by remember { mutableStateOf("") }
+    var search by remember { mutableStateOf<String?>(null) }
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -127,7 +126,7 @@ fun SearchEventScreen(
                     onSearch = onSearch,
                     isExpanded = isExpanded,
                     setExpanded = { isExpanded = !isExpanded },
-                    onTextChange = { search = it }
+                    onTextChange = { text -> search = if (text!="") text else null }
                 )
                 if (!isExpanded) NearMe(onNearMeRequested)
             }
@@ -171,9 +170,9 @@ fun SearchEventScreen(
                 LazyColumn(state = listState) {
                     itemsIndexed(events) { index, event ->
                         EventCard(event = event, onEventClick = onEventClick)
-                        if(index == events.size - 1){
-                            if(selectedCategory != "") getMoreEvents(selectedCategory, events.size)
-                            else if (search != "") getMoreEvents(search, events.size)
+                        if(index == events.size - 1) {
+                            if(selectedCategory != null) getMoreEvents(selectedCategory, events.size)
+                            else if (search != null) getMoreEvents(search, events.size)
                             else getMoreEvents(null, events.size)
                         }
                     }

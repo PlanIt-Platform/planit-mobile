@@ -5,7 +5,6 @@ package com.example.planit_mobile.services.models
  * @param title The title of the event.
  * @param description The description of the event.
  * @param category The category of the event.
- * @param subcategory The subcategory of the event.
  * @param location The location of the event.
  * @param visibility The visibility of the event.
  * @param date The date of the event.

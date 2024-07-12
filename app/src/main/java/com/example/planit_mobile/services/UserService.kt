@@ -2,7 +2,6 @@ package com.example.planit_mobile.services
 
 import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.services.models.AuthOutputModel
-import com.example.planit_mobile.services.models.SearchEventResult
 import com.example.planit_mobile.services.models.UserEventsResult
 
 /**
