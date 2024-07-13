@@ -2,7 +2,8 @@ package com.example.planit_mobile.services.utils
 
 
 object PathTemplates {
-    const val PLANIT_API_URL = "https://611d-2a01-14-8020-3680-d4d5-5a6a-840d-e06a.ngrok-free.app/api-planit"
+    const val PLANIT_API_URL = "http://10.0.2.2:1904/api-planit"
+        // NGROK:"https://611d-2a01-14-8020-3680-d4d5-5a6a-840d-e06a.ngrok-free.app/api-planit"
 
     /**
      * User paths
