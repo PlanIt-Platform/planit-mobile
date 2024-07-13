@@ -589,8 +589,9 @@ fun EventDetailsContent(
                         onClick = { leaveEvent() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                         modifier = Modifier
-                            .fillMaxWidth(0.33f)
+                            .weight(1f)
                             .padding(end = 5.dp)
+                            .height(50.dp)
                     ) {
                         Text(
                             "Leave Event",
@@ -604,8 +605,9 @@ fun EventDetailsContent(
                         Button(
                             onClick = { editMode = true },
                             modifier = Modifier
-                                .fillMaxWidth(0.5f)
+                                .weight(1f)
                                 .padding(end = 5.dp)
+                                .height(50.dp)
                         ) {
                             Text(
                                 "Edit Event",
@@ -618,7 +620,9 @@ fun EventDetailsContent(
                         Button(
                             onClick = { deleteEvent() },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
                         ) {
                             Text(
                                 "Delete Event",

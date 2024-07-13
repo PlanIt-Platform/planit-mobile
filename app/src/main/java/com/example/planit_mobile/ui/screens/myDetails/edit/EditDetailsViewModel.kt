@@ -1,4 +1,4 @@
-package com.example.planit_mobile.ui.screens.profile
+package com.example.planit_mobile.ui.screens.myDetails.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,14 +20,14 @@ import com.example.planit_mobile.ui.screens.common.loading
 import kotlinx.coroutines.launch
 
 
-class EditUserProfileViewModel (
+class EditDetailsViewModel (
     private val userService: UserService,
     private val sessionStorage: SessionDataStore
 ) : ViewModel() {
 
     companion object {
         fun factory(userService: UserService, sessionStorage: SessionDataStore) = viewModelFactory {
-            initializer { EditUserProfileViewModel(userService, sessionStorage) }
+            initializer { EditDetailsViewModel(userService, sessionStorage) }
         }
     }
 

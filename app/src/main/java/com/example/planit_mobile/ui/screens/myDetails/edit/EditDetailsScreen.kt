@@ -1,4 +1,4 @@
-package com.example.planit_mobile.ui.screens.profile
+package com.example.planit_mobile.ui.screens.myDetails.edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +51,7 @@ import com.example.planit_mobile.ui.screens.common.Title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditUserProfileScreen(
+fun EditDetailsScreen(
     onBackRequested: () -> Unit,
     onEdit: (String, List<String>, String) -> Unit,
     userInfo: User

@@ -128,7 +128,7 @@ fun SearchEventScreen(
                 Box {
                     var selectedCategory by remember { mutableStateOf<String?>(null) }
                     LazyRow {
-                        items(categories) { category ->
+                        items(listOf("All") + categories) { category ->
                             Box(
                                 modifier = Modifier
                                     .clickable(
@@ -148,7 +148,9 @@ fun SearchEventScreen(
                             ) {
                                 Text(
                                     text = category,
-                                    color = if (selectedCategory == category) Color.White else Color.Gray,
+                                    color = if (selectedCategory == category) Color.White else Color(
+                                        0xFFB4B4B4
+                                    ),
                                     modifier = Modifier.padding(horizontal = 8.dp)
                                 )
                             }
@@ -161,8 +163,25 @@ fun SearchEventScreen(
                     .weight(1f)
             ) {
                 LazyColumn {
-                    items(events) { event ->
-                        EventCard(event = event, onEventClick = onEventClick)
+                    if (events.isEmpty()) {
+                        item {
+                            Spacer(modifier = Modifier.height(140.dp))
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No events found",
+                                    color = Color.White,
+                                    fontSize = 30.sp
+                                )
+                            }
+                        }
+                    }
+                    else {
+                        items(events) { event ->
+                            EventCard(event = event, onEventClick = onEventClick)
+                        }
                     }
                 }
             }

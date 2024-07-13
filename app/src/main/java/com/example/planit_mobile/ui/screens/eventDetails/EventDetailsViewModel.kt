@@ -134,7 +134,6 @@ class EventDetailsViewModel(
             onFailure = {
                 errorStateFlow.value = errorMessage(it.message.toString())
                 loadStateFlow.value = idle()
-                viewModelScope.launch { sessionStorage.clearSession() }
             },
             sessionStorage = sessionStorage
         )
@@ -308,7 +307,6 @@ class EventDetailsViewModel(
                 service.getPolls(userAccessToken, userRefreshToken, eventID)
             },
             onSuccess = {
-                Log.d("EVENT polls", it.toString())
                 pollsFlow.value = it
             },
             onFailure = {

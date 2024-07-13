@@ -27,11 +27,11 @@ class RegisterViewModel(
         }
     }
 
-    private val loadStateFlow: MutableStateFlow<LoadState<Int>> = MutableStateFlow(idle())
+    private val loadStateFlow: MutableStateFlow<LoadState<RegisterState>> = MutableStateFlow(Step1State)
     private val userCreationSuccessful: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
 
-    val loadState: Flow<LoadState<Int>>
+    val loadState: Flow<LoadState<RegisterState>>
         get() = loadStateFlow.asStateFlow()
     val userCreationSuccessfulState: Flow<Boolean>
         get() = userCreationSuccessful.asStateFlow()
@@ -48,7 +48,7 @@ class RegisterViewModel(
                     refreshToken = it.refreshToken,
                     userID = it.id,
                 )
-                loadStateFlow.value = step1()
+                loadStateFlow.value = step2()
                 userCreationSuccessful.value = true
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) }
@@ -61,7 +61,7 @@ class RegisterViewModel(
                 userService.editUser(userAccessToken, userRefreshToken, name, interests, description)
             },
             onSuccess = {
-                loadStateFlow.value = step3()
+                loadStateFlow.value = success()
             },
             onFailure = { errorStateFlow.value = errorMessage(it.message.toString()) },
             sessionStorage = sessionStorage
@@ -72,8 +72,8 @@ class RegisterViewModel(
         userCreationSuccessful.value = false
     }
 
-    fun setLoadStateToStep2(){
-        loadStateFlow.value = step2()
+    fun setLoadState(step: RegisterState) {
+        loadStateFlow.value = step
     }
 
     fun dismissError() {

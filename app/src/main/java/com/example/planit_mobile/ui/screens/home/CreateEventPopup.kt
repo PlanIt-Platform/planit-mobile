@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import com.example.planit_mobile.ui.screens.common.MyGoogleMap
 import com.example.planit_mobile.ui.screens.common.endDatePickerDialog
 import com.example.planit_mobile.ui.screens.common.startDatePickerDialog
+import com.example.planit_mobile.ui.screens.utils.addToGoogleCalendarIntent
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -71,8 +74,8 @@ fun CreateEventPopup(
     var eventDescription by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var expandedVisibility by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf("") }
-    var selectedVisibility by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("Technology") }
+    var selectedVisibility by remember { mutableStateOf("Public") }
     var location by remember { mutableStateOf("") }
     var locationLink by remember { mutableStateOf("") }
     var locationSwitchState by remember { mutableStateOf(false) }
@@ -80,6 +83,7 @@ fun CreateEventPopup(
     var amount by remember { mutableStateOf("") }
     var currency by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var showAddToGoogleCalendarDialog by remember { mutableStateOf(false) }
 
     val initialLocation = LatLng(0.0, 0.0)
     var locationCoords by remember { mutableStateOf(initialLocation)}
@@ -365,13 +369,13 @@ fun CreateEventPopup(
                             locationSwitchState = it
                             locationType = if (!locationSwitchState) "Physical" else "Online"
                         },
-                        modifier = Modifier.padding(5.dp)
+                        modifier = Modifier.padding(8.dp).offset(y = (-20).dp)
                     )
                     Text(
                         locationType,
                         color = Color.White,
                         fontSize = 15.sp,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
                     )
                 }
 
@@ -530,34 +534,7 @@ fun CreateEventPopup(
         SectionBox {
             Button(
                 onClick = {
-                    val price = when {
-                        (amount.isEmpty() && currency.isEmpty()) -> "0.00Eur"
-                        amount.isEmpty() -> "0.00$currency"
-                        currency.isEmpty() -> amount+"Eur"
-                        !amount.contains(".") -> "$amount.00$currency"
-                        amount.split(".")[1].length == 1 -> amount+"0"+currency
-                        amount.contains(".") && amount.split(".")[1].isEmpty() ->
-                            amount+"00"+currency
-                        else -> amount+currency
-                    }
-                    val finalLocation =
-                        if (locationType == "Physical"){
-                            if (location == "") null else location
-                        } else {
-                            if(locationLink == "")null else locationLink
-                        }
-                    val finalLocationType = if (finalLocation == null) null else locationType
-                    val (latitude, longitude) =
-                        if (locationType == "Physical" && location.isNotEmpty() && successfulLocation) {
-                            Pair(locationCoords.latitude.toString(), locationCoords.longitude.toString())
-                        } else {
-                            Pair(null, null)
-                        }
-                    createEventRequested(
-                        eventName, eventDescription, selectedCategory,
-                        finalLocationType, finalLocation, latitude, longitude, selectedVisibility,
-                        startDateTime, endDateTime, price, password
-                    )
+                    showAddToGoogleCalendarDialog = true
                 },
                 enabled = eventName.isNotEmpty() && selectedCategory.isNotEmpty()
                         && selectedVisibility.isNotEmpty() && startDateTime.isNotEmpty() &&
@@ -565,6 +542,87 @@ fun CreateEventPopup(
             ) {
                 Text("Create Event")
             }
+        }
+
+        if (showAddToGoogleCalendarDialog) {
+            val price = when {
+                (amount.isEmpty() && currency.isEmpty()) -> "0.00Eur"
+                amount.isEmpty() -> "0.00$currency"
+                currency.isEmpty() -> amount+"Eur"
+                !amount.contains(".") -> "$amount.00$currency"
+                amount.split(".")[1].length == 1 -> amount+"0"+currency
+                amount.contains(".") && amount.split(".")[1].isEmpty() ->
+                    amount+"00"+currency
+                else -> amount+currency
+            }
+            val finalLocation =
+                if (locationType == "Physical"){
+                    if (location == "") null else location
+                } else {
+                    if(locationLink == "")null else locationLink
+                }
+            val finalLocationType = if (finalLocation == null) null else locationType
+            val (latitude, longitude) =
+                if (locationType == "Physical" && location.isNotEmpty() && successfulLocation) {
+                    Pair(locationCoords.latitude.toString(), locationCoords.longitude.toString())
+                } else {
+                    Pair(null, null)
+                }
+            AlertDialog(
+                onDismissRequest = { showAddToGoogleCalendarDialog = false },
+                title = { Text(text = "Add to Google Calendar") },
+                text = { Text("Do you want to add this event to your Google Calendar?") },
+                confirmButton = {
+                    Button(onClick = {
+                        showAddToGoogleCalendarDialog = false
+                        addToGoogleCalendarIntent(
+                            context,
+                            eventName,
+                            eventDescription,
+                            startDateTime,
+                            endDateTime,
+                            finalLocation
+                        )
+                        createEventRequested(
+                            eventName,
+                            eventDescription,
+                            selectedCategory,
+                            finalLocationType,
+                            finalLocation,
+                            latitude,
+                            longitude,
+                            selectedVisibility,
+                            startDateTime,
+                            endDateTime,
+                            price,
+                            password
+                        )
+                    }) {
+                        Text("Yes")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = {
+                        showAddToGoogleCalendarDialog = false
+                        createEventRequested(
+                            eventName,
+                            eventDescription,
+                            selectedCategory,
+                            finalLocationType,
+                            finalLocation,
+                            latitude,
+                            longitude,
+                            selectedVisibility,
+                            startDateTime,
+                            endDateTime,
+                            price,
+                            password
+                        )
+                    }) {
+                        Text("No")
+                    }
+                }
+            )
         }
     }
 

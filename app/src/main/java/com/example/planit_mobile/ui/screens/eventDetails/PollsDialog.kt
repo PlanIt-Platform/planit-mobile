@@ -3,6 +3,7 @@ package com.example.planit_mobile.ui.screens.eventDetails
 //noinspection SuspiciousImport
 import android.R
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,6 +62,7 @@ fun PollsDialog(
     setCreatePollOptions: (Int) -> Unit
 ) {
     var showPollsOrCreate by remember { mutableStateOf(false) }
+    var maxOptionsReached by remember { mutableStateOf(false) }
 
     Dialog(
         onDismissRequest = { onDismissRequest() },
@@ -71,12 +75,12 @@ fun PollsDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth().padding(vertical = 15.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = { onDismissRequest() },
-                    modifier = Modifier.padding(5.dp)
+                    modifier = Modifier.padding(end = 8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
@@ -87,9 +91,9 @@ fun PollsDialog(
                 Text(
                     text = "Polls",
                     style = MaterialTheme.typography.displayMedium,
-                    color = Color.White
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 55.dp)
                 )
-                Spacer(modifier = Modifier.padding(16.dp))
             }
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -191,7 +195,9 @@ fun PollsDialog(
                 var durationExpanded by remember { mutableStateOf(false) }
                 var pollOptions by remember { mutableStateOf(mutableListOf(mutableStateOf(""))) }
 
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
                     item {
                         Text(
                             text = "Create Poll",
@@ -205,27 +211,27 @@ fun PollsDialog(
                         TextField(
                             value = pollTitle,
                             onValueChange = { pollTitle = it },
-                            label = { Text("Title") },
+                            label = { Text("Title *") },
                             modifier = Modifier.padding(5.dp)
                         )
                     }
                     item {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(0.93f)
-                                .border(1.dp, Color.DarkGray, RoundedCornerShape(4.dp))
+                                .fillMaxWidth(0.92f)
+                                .offset(x = 5.dp)
                                 .background(Color.LightGray, RoundedCornerShape(4.dp))
                                 .height(50.dp)
-                                .padding(5.dp)
+                                .padding(vertical = 10.dp, horizontal = 10.dp)
                                 .align(Alignment.CenterHorizontally),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = pollDuration.ifEmpty { "Duration" },
+                                text = if (pollDuration.isEmpty()) "Duration *" else "$pollDuration hours",
                                 modifier = Modifier
                                     .clickable { durationExpanded = true }
                                     .fillMaxSize(),
-                                fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                             )
                             DropdownMenu(
                                 expanded = durationExpanded,
@@ -238,7 +244,7 @@ fun PollsDialog(
                                             durationExpanded = false
                                         },
                                         text = {
-                                            Text(text = durationOption)
+                                            Text(text = "$durationOption hours")
                                         }
                                     )
                                 }
@@ -267,8 +273,13 @@ fun PollsDialog(
                     item {
                         IconButton(
                             onClick = {
-                                pollOptions.add(mutableStateOf(""))
-                                setCreatePollOptions(createPollOptions + 1)
+                                if (pollOptions.size < 5) {
+                                    pollOptions.add(mutableStateOf(""))
+                                    setCreatePollOptions(createPollOptions + 1)
+                                    maxOptionsReached = false
+                                } else {
+                                    maxOptionsReached = true
+                                }
                             }
                         ) {
                             Icon(
@@ -277,6 +288,13 @@ fun PollsDialog(
                                 modifier = Modifier.padding(5.dp),
                                 tint = Color.Green
                             )
+                        }
+                        if (maxOptionsReached) {
+                            Toast.makeText(
+                                LocalContext.current,
+                                "Maximum number of options reached",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                     item {
@@ -288,13 +306,14 @@ fun PollsDialog(
                                     showPollsOrCreate = false
                                 }
                             },
-                            modifier = Modifier.padding(5.dp),
+                            modifier = Modifier.padding(horizontal = 100.dp, vertical = 5.dp),
                             enabled = pollOptions.any { it.value.isNotEmpty() },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White
+                                containerColor = Color(57, 99, 119, 255),
+                                disabledContainerColor = Color.DarkGray
                             )
                         ) {
-                            Text("Create", color = Color.Black)
+                            Text("Create", color = Color.White)
                         }
                     }
 

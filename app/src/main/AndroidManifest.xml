@@ -38,7 +38,7 @@
             android:name=".ui.screens.home.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.screens.profile.EditUserProfileActivity"
+            android:name=".ui.screens.myDetails.edit.EditDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.screens.eventDetails.EventDetailsActivity"
@@ -47,6 +47,8 @@
             android:name=".ui.screens.otheruserprofile.OtherUserActivity"
             android:exported="false" />
         <activity android:name=".ui.screens.nearMe.NearMeActivity"
+            android:exported="false" />
+        <activity android:name=".ui.screens.calendar.CalendarActivity"
             android:exported="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -58,5 +60,7 @@
         tools:ignore="ManifestOrder" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
 </manifest>

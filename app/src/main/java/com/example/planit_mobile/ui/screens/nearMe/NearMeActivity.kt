@@ -105,9 +105,9 @@ class NearMeActivity : ComponentActivity() {
                                 color = MaterialTheme.colorScheme.background
                             ) {
                                 if (nearbyEventsState is Loading) {
-                                    LoadingScreen {
-                                        HomeActivity.navigateTo(this)
-                                    }
+                                    LoadingScreen(
+                                        onBackRequested = { finish() }
+                                    )
                                 }
                                 else {
                                     NearMeScreen(
@@ -115,10 +115,10 @@ class NearMeActivity : ComponentActivity() {
                                         selectedRadius = selectedRadius,
                                         numberOfEvents = numberOfEvents,
                                         nearbyEvents = nearbyEventsState.getOrNull() ?: NearbyEventsResult(emptyList()),
-                                        onEventClick = { event ->
+                                        onEventClick = { id ->
                                             EventDetailsActivity.navigateTo(
                                                 this@NearMeActivity,
-                                                event.id,
+                                                id,
                                                 "Public"
                                             )
                                         },

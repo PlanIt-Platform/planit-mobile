@@ -1,16 +1,12 @@
-package com.example.planit_mobile.ui.screens.profile
+package com.example.planit_mobile.ui.screens.calendar
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.myapplication.sessionStorage.SessionDataStore
-import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.services.UserService
-import com.example.planit_mobile.services.utils.executeRequest
+import com.example.planit_mobile.services.models.UserEventsResult
 import com.example.planit_mobile.services.utils.launchAndAuthenticateRequest
-import com.example.planit_mobile.services.utils.launchAndRequest
-import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.LoadState
 import com.example.planit_mobile.ui.screens.common.errorMessage
 import com.example.planit_mobile.ui.screens.common.idle
@@ -19,65 +15,49 @@ import com.example.planit_mobile.ui.screens.common.loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import com.example.planit_mobile.ui.screens.common.Error
+import java.util.Calendar
 
-class UserProfileViewModel(
+class CalendarViewModel(
     private val service: UserService,
     private val sessionStorage: SessionDataStore
 ) : ViewModel() {
 
     companion object {
         fun factory(service: UserService, sessionStorage: SessionDataStore) = viewModelFactory {
-            initializer { UserProfileViewModel(service, sessionStorage) }
+            initializer { CalendarViewModel(service, sessionStorage) }
         }
     }
 
-    private val loadStateFlow : MutableStateFlow<LoadState<User>> = MutableStateFlow(idle())
+    private val _selectedDay = MutableStateFlow(Calendar.getInstance())
+    private val _currentMonth = MutableStateFlow(Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1) })
+    private val loadStateFlow : MutableStateFlow<LoadState<UserEventsResult>> = MutableStateFlow(idle())
     private val errorStateFlow: MutableStateFlow<Error> = MutableStateFlow(Error(""))
-    private val logStateFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
-    val logState: Flow<Boolean>
-        get() = logStateFlow.asStateFlow()
-
-    val loadState: Flow<LoadState<User>>
+    val currentMonth: Flow<Calendar>
+        get() = _currentMonth.asStateFlow()
+    val selectedDay: Flow<Calendar>
+        get() = _selectedDay.asStateFlow()
+    val loadState: Flow<LoadState<UserEventsResult>>
         get() = loadStateFlow.asStateFlow()
     val errorState: Flow<Error>
         get() = errorStateFlow.asStateFlow()
 
-    suspend fun fetchUser(id: Int? = null) {
+    fun getUserEvents() {
         loadStateFlow.value = loading()
-        val userId = sessionStorage.getUserID() ?: return
         launchAndAuthenticateRequest(
             request = { userAccessToken, userRefreshToken, _ ->
-                service.fetchUserInfo(id ?: userId, userAccessToken, userRefreshToken)
+                service.getUserEvents(
+                    userAccessToken,
+                    userRefreshToken
+                )
             },
             onSuccess = {
                 loadStateFlow.value = loaded(it)
             },
             onFailure = {
                 errorStateFlow.value = errorMessage(it.message.toString())
-                logStateFlow.value = false
-                loadStateFlow.value = idle()
-                viewModelScope.launch { sessionStorage.clearSession() }
             },
-            sessionStorage = sessionStorage
-        )
-    }
-
-    fun setLoadingState() {
-        loadStateFlow.value = loading()
-    }
-
-    fun logout() {
-        launchAndAuthenticateRequest(
-            request = { userAccessToken, userRefreshToken, _ ->
-                service.logout(userAccessToken, userRefreshToken)
-            },
-            onSuccess = {
-                logStateFlow.value = false
-                viewModelScope.launch { sessionStorage.clearSession() }
-            },
-            onFailure = {},
             sessionStorage = sessionStorage
         )
     }
@@ -86,7 +66,19 @@ class UserProfileViewModel(
         errorStateFlow.value = Error("")
     }
 
-    suspend fun refreshData() {
-        fetchUser()
+    fun selectDay(day: Int, month: Int, year: Int) {
+        _selectedDay.value = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month)
+            set(Calendar.DAY_OF_MONTH, day)
+        }
+    }
+
+    fun updateMonth(currentMonthDate: Calendar) {
+        _currentMonth.value = Calendar.getInstance().apply {
+            set(Calendar.YEAR, currentMonthDate.get(Calendar.YEAR))
+            set(Calendar.MONTH, currentMonthDate.get(Calendar.MONTH))
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
     }
 }

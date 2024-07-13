@@ -1,6 +1,5 @@
 package com.example.planit_mobile.ui.screens.eventDetails
 
-//noinspection SuspiciousImport
 import android.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material3.BottomSheetDefaults
@@ -36,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.planit_mobile.services.models.UsersInEvent
 import com.example.planit_mobile.ui.screens.common.buildAnnotatedString
@@ -131,7 +130,10 @@ fun UserList(
                     if (user.id != userID){
                         ClickableText(
                             text = buildAnnotatedString("", user.username),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyMedium.merge(TextStyle(color = Color(
+                                0xFFA2A2A2
+                            )
+                            )),
                             modifier = Modifier.padding(start = 10.dp),
                             onClick = {
                                 onNavigateToOtherUserProfile(user.id)

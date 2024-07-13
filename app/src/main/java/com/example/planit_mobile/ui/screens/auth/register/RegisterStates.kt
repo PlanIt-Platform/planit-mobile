@@ -7,6 +7,10 @@ data object Step1State : RegisterState()
 data object Step2State : RegisterState()
 data object Step3State: RegisterState()
 
+data object SuccessState : RegisterState()
+
 fun step1(): Step1State = Step1State
 fun step2(): Step2State = Step2State
 fun step3(): Step3State = Step3State
+
+fun success(): SuccessState = SuccessState

@@ -27,7 +27,7 @@ import com.example.planit_mobile.ui.screens.common.BackArrow
 
 
 @Composable
-fun UserNotInPrivateEventScreen(
+fun JoinPrivateEventScreen(
     joinEvent: (String) -> Unit,
     onBackRequested: () -> Unit
 ) {

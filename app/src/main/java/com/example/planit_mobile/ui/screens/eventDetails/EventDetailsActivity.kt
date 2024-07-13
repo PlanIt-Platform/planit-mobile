@@ -100,7 +100,7 @@ class EventDetailsActivity : ComponentActivity() {
                         )
                     } else {
                         if (!isUserInEvent && visibility == "Private") {
-                            UserNotInPrivateEventScreen(
+                            JoinPrivateEventScreen(
                                 joinEvent = { password ->
                                         viewModel.joinEvent(eventId, password)
                                 },

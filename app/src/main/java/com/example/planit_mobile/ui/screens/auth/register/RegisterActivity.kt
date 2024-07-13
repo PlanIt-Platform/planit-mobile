@@ -3,6 +3,7 @@ package com.example.planit_mobile.ui.screens.auth.register
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.example.planit_mobile.PlanItDependencyProvider
@@ -18,6 +20,7 @@ import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.ErrorPopup
+import com.example.planit_mobile.ui.screens.common.getOrNull
 
 
 class RegisterActivity : ComponentActivity() {
@@ -39,7 +42,7 @@ class RegisterActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
             viewModel.loadState.collect {
-                if (it is Step3State) {
+                if (it is SuccessState) {
                     HomeActivity.navigateTo(this@RegisterActivity)
                 }
             }
@@ -48,7 +51,7 @@ class RegisterActivity : ComponentActivity() {
         setContent {
             val userCreationSuccessful = viewModel.userCreationSuccessfulState.collectAsState(initial = false).value
             val errorMessage = viewModel.errorState.collectAsState(initial = Error("")).value.message
-            val loadState = viewModel.loadState.collectAsState(initial = Error("")).value
+            val loadState by viewModel.loadState.collectAsState(initial = Step1State)
             PlanitMobileTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -62,15 +65,17 @@ class RegisterActivity : ComponentActivity() {
                             viewModel.editUser(name, interests, description)
                         },
                         onBackRequested = {
-                            when(loadState ){
+                            when(loadState){
                                 step1() -> finish()
                                 step2() -> finish()
-                                step3() -> viewModel.setLoadStateToStep2()
+                                step3() -> viewModel.setLoadState(step2())
                             }
                         },
                         showError = errorMessage != "",
                         userCreationSuccessful = userCreationSuccessful,
-                        dismissUserCreationSuccess = { viewModel.dismissUserCreationSuccess() }
+                        dismissUserCreationSuccess = { viewModel.dismissUserCreationSuccess() },
+                        steps = loadState,
+                        setSteps = { viewModel.setLoadState(it) }
                     )
                     ErrorPopup(
                         showDialog = errorMessage != "",

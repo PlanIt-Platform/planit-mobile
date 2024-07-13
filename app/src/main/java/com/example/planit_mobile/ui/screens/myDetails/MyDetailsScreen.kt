@@ -1,6 +1,7 @@
-package com.example.planit_mobile.ui.screens.profile
+package com.example.planit_mobile.ui.screens.myDetails
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -32,10 +34,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.planit_mobile.R
 import com.example.planit_mobile.domain.User
 import com.example.planit_mobile.ui.screens.common.BotBar
 import com.example.planit_mobile.ui.screens.common.NavigationHandlers
@@ -75,10 +79,10 @@ fun UserProfileScreen(
                 ),
                 modifier = Modifier
                     .offset(y = 0.dp),
-                title = { Text("Profile", fontWeight = FontWeight.Bold) },
+                title = { Text("Profile", fontWeight = FontWeight.Bold, color = Color.White) },
                 actions = {
                     IconButton(onClick = { dropdownMenuExpanded.value = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                        Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = Color.White)
                     }
                     DropdownMenu(
                         expanded = dropdownMenuExpanded.value,
@@ -109,8 +113,18 @@ fun UpperHalf(padding: PaddingValues, userInfo: User){
         modifier = Modifier
             .padding(padding)
             .height(275.dp)
-            .background(color = Color(28, 185, 165, 255))
+            .background(color = Color(0xFF3A4079))
     ) {
+        Canvas(
+            modifier = Modifier
+                .size(150.dp)
+                .align(Alignment.TopCenter)
+                .offset(y = 40.dp)
+        ) {
+            drawCircle(
+                color = Color.White
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -118,13 +132,12 @@ fun UpperHalf(padding: PaddingValues, userInfo: User){
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Canvas(
-                modifier = Modifier.size(150.dp)
-            ) {
-                drawCircle(
-                    color = Color.White
-                )
-            }
+            Image(
+                painter = painterResource(id = R.drawable.profile_icon_2),
+                contentDescription = "Profile Icon",
+                modifier = Modifier
+                    .requiredSize(150.dp)
+            )
             Text(
                 text = userInfo.name,
                 style = androidx.compose.ui.text.TextStyle(color = Color.White),
@@ -182,24 +195,34 @@ fun LowerHalf(userInfo: User){
                 style = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 fontSize = 20.sp
             )
-            val chunkedInterests = userInfo.interests.chunked(3)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                for (interestsColumn in chunkedInterests) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.Top,
-                    ) {
-                        for (interest in interestsColumn) {
-                            Text(
-                                text = "• $interest",
-                                style = androidx.compose.ui.text.TextStyle(color = Color.Black),
-                                fontSize = 16.sp
-                            )
+            if (userInfo.interests.isEmpty()) {
+                Text(
+                    text = "No interests provided",
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = androidx.compose.ui.text.TextStyle(color = Color.Black),
+                    fontSize = 16.sp
+                )
+            }
+            else {
+                val chunkedInterests = userInfo.interests.chunked(3)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    for (interestsColumn in chunkedInterests) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.Top,
+                        ) {
+                            for (interest in interestsColumn) {
+                                Text(
+                                    text = "• $interest",
+                                    style = androidx.compose.ui.text.TextStyle(color = Color.Black),
+                                    fontSize = 16.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -210,12 +233,22 @@ fun LowerHalf(userInfo: User){
                 style = androidx.compose.ui.text.TextStyle(color = Color.Black),
                 fontSize = 20.sp
             )
-            Text(
-                text = userInfo.description,
-                modifier = Modifier.padding(horizontal = 20.dp),
-                style = androidx.compose.ui.text.TextStyle(color = Color.Black),
-                fontSize = 16.sp
-            )
+            if(userInfo.description.isEmpty()){
+                Text(
+                    text = "No description provided",
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = androidx.compose.ui.text.TextStyle(color = Color.Black),
+                    fontSize = 16.sp
+                )
+            }
+            else{
+                Text(
+                    text = userInfo.description,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = androidx.compose.ui.text.TextStyle(color = Color.Black),
+                    fontSize = 16.sp
+                )
+            }
         }
     }
 }

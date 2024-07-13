@@ -1,4 +1,4 @@
-package com.example.planit_mobile.ui.screens.profile
+package com.example.planit_mobile.ui.screens.myDetails.edit
 
 import android.app.Activity
 import android.content.Intent
@@ -23,17 +23,17 @@ import com.example.planit_mobile.ui.screens.home.HomeActivity
 import com.example.planit_mobile.ui.theme.PlanitMobileTheme
 import kotlinx.coroutines.launch
 
-class EditUserProfileActivity : ComponentActivity() {
+class EditDetailsActivity : ComponentActivity() {
 
     private val dependencies by lazy { application as PlanItDependencyProvider }
 
-    private val editUserViewModel by viewModels<EditUserProfileViewModel> {
-        EditUserProfileViewModel.factory(dependencies.userService, dependencies.sessionStorage)
+    private val editUserViewModel by viewModels<EditDetailsViewModel> {
+        EditDetailsViewModel.factory(dependencies.userService, dependencies.sessionStorage)
     }
 
     companion object {
         fun navigateTo(origin: Activity) {
-            val intent = Intent(origin, EditUserProfileActivity::class.java)
+            val intent = Intent(origin, EditDetailsActivity::class.java)
             origin.startActivity(intent)
         }
     }
@@ -45,7 +45,7 @@ class EditUserProfileActivity : ComponentActivity() {
             editUserViewModel.fetchUser()
             editUserViewModel.logState.collect{
                 if (!it) {
-                    GuestActivity.navigateTo(this@EditUserProfileActivity)
+                    GuestActivity.navigateTo(this@EditDetailsActivity)
                 }
             }
         }
@@ -62,11 +62,11 @@ class EditUserProfileActivity : ComponentActivity() {
 
                     if (loadState is Loading) {
                         LoadingScreen {
-                            HomeActivity.navigateTo(this@EditUserProfileActivity)
+                            HomeActivity.navigateTo(this@EditDetailsActivity)
                         }
                     } else {
                         if(user != null) {
-                            EditUserProfileScreen(
+                            EditDetailsScreen(
                                 onBackRequested = { finish() },
                                 onEdit = { name, interests, description ->
                                     editUserViewModel.editUser(name, interests, description)

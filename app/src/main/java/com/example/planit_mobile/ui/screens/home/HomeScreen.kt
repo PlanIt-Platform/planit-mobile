@@ -3,6 +3,7 @@ package com.example.planit_mobile.ui.screens.home
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,6 +54,7 @@ import com.example.planit_mobile.ui.screens.common.NavigationHandlers
 fun HomeScreen(
     onProfileRequested: () -> Unit,
     onHomeRequested: () -> Unit,
+    onCalendarRequested: () -> Unit,
     onEventsRequested: () -> Unit,
     categories: List<String>,
     createEventRequested : (
@@ -62,7 +64,8 @@ fun HomeScreen(
     eventCreatedMessage : String,
     userEvents: UserEventsResult?,
     onEventClick: (SearchEventResult) -> Unit,
-    dismissEventCreatedPopUp: () -> Unit
+    dismissEventCreatedPopUp: () -> Unit,
+    onNearMeRequested: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -77,22 +80,22 @@ fun HomeScreen(
                         "Home",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp // Adjust the font size as needed
+                        fontSize = 25.sp
                     )
                 },
                 colors = topAppBarColors(containerColor = Color(24, 38, 44, 255)),
                 actions = {
                     IconButton(
                         onClick = {
-                            // TODO
+                           onCalendarRequested()
                         },
-                        modifier = Modifier.size(35.dp) // Adjust the icon size as needed
+                        modifier = Modifier.size(35.dp)
                     ) {
                         Icon(
                             Icons.Default.DateRange,
                             contentDescription = "Calendar",
                             tint = Color.White,
-                            modifier = Modifier.size(29.dp) // This adjusts the size of the Icon itself
+                            modifier = Modifier.size(29.dp)
                         )
                     }
                 }
@@ -128,6 +131,9 @@ fun HomeScreen(
             userEvents = userEvents,
             onEventClick = { event ->
                 onEventClick(event)
+            },
+            onNearMeRequested = {
+                onNearMeRequested()
             }
         )
 
@@ -165,7 +171,8 @@ fun HomeScreen(
 fun BackgroundBox(
     it: PaddingValues,
     userEvents: UserEventsResult?,
-    onEventClick: (SearchEventResult) -> Unit
+    onEventClick: (SearchEventResult) -> Unit,
+    onNearMeRequested: () -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -178,13 +185,51 @@ fun BackgroundBox(
                 .padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row {
-                UserEventsDisplay(
-                    userEvents = userEvents,
-                    onEventClick = { event ->
-                        onEventClick(event)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(2f)
+            ){
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "My events",
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                    Row {
+                        UserEventsDisplay(
+                            userEvents = userEvents,
+                            onEventClick = { event ->
+                                onEventClick(event)
+                            }
+                        )
                     }
-                )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Want to find events around you?",
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                    Text(
+                        text = "Click here",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(10.dp).clickable { onNearMeRequested() }
+                    )
+                }
             }
         }
     }
@@ -196,6 +241,7 @@ fun PreviewUserProfileScreen() {
     HomeScreen(
         onProfileRequested = {},
         onHomeRequested = {},
+        onCalendarRequested = {},
         onEventsRequested = {},
         categories = listOf("Simple Meeting", "Birthday Party", "Wedding"),
         createEventRequested = { _, _, _, _, _, _, _, _, _, _, _, _ -> },
@@ -207,6 +253,7 @@ fun PreviewUserProfileScreen() {
             listOf()
         ),
         onEventClick = {},
-        dismissEventCreatedPopUp = {}
+        dismissEventCreatedPopUp = {},
+        onNearMeRequested = {}
     )
 }

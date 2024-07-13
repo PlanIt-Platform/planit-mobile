@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -27,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.planit_mobile.services.models.EventModel
@@ -34,6 +37,7 @@ import com.example.planit_mobile.services.models.Message
 import com.example.planit_mobile.services.models.PollModel
 import com.example.planit_mobile.services.models.UsersInEvent
 import com.example.planit_mobile.ui.screens.common.BackArrow
+import com.example.planit_mobile.ui.screens.utils.addToGoogleCalendarIntent
 
 @Composable
 fun EventDetailsScreen(
@@ -63,6 +67,8 @@ fun EventDetailsScreen(
     messages: List<Message>,
     onNavigateToOtherUserProfile: (Int) -> Unit
 ) {
+    val context = LocalContext.current
+    var showAddToGoogleCalendarDialog by remember { mutableStateOf(false) }
     var showUserSheet by remember { mutableStateOf(false) }
     var showPollsDialog by remember { mutableStateOf(false) }
     var showChatDialog by remember { mutableStateOf(false) }
@@ -80,6 +86,9 @@ fun EventDetailsScreen(
                 viewParticipants = {
                     showUserSheet = true
                     updateUsersInEvent()
+                },
+                addEventToGoogle = {
+                    showAddToGoogleCalendarDialog = true
                 }
             )
         },
@@ -118,6 +127,34 @@ fun EventDetailsScreen(
                     deleteEvent = {deleteEvent()},
                     categories = categories
                 )
+
+                if (isUserInEvent && showAddToGoogleCalendarDialog){
+                    AlertDialog(
+                        onDismissRequest = { showAddToGoogleCalendarDialog = false },
+                        title = { Text(text = "Add to Google Calendar") },
+                        text = { Text("Do you want to add this event to your Google Calendar?") },
+                        confirmButton = {
+                            Button(onClick = {
+                                showAddToGoogleCalendarDialog = false
+                                addToGoogleCalendarIntent(
+                                    context,
+                                    eventDetails.title,
+                                    eventDetails.description ?: "",
+                                    eventDetails.date,
+                                    eventDetails.endDate ?: eventDetails.date,
+                                    eventDetails.location
+                                )
+                            }) {
+                                Text("Yes")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showAddToGoogleCalendarDialog = false }) {
+                                Text("No")
+                            }
+                        }
+                    )
+                }
             }
             if(showUserSheet) {
                 UserSheet(
@@ -140,7 +177,7 @@ fun EventDetailsScreen(
                 )
             }
             if(showPollsDialog){
-                var createPollOptions by remember { mutableIntStateOf(1) }
+                var createPollOptions by remember { mutableIntStateOf(2) }
                 PollsDialog(
                     polls = polls ?: emptyList(),
                     createPoll = {pollTitle, duration, options ->
@@ -179,7 +216,8 @@ fun EventDetailsTopBar(
     userInEvent: Boolean,
     joinEvent: (String) -> Unit,
     accessPolls: () -> Unit,
-    viewParticipants: () -> Unit
+    viewParticipants: () -> Unit,
+    addEventToGoogle: () -> Unit
 ) {
     TopAppBar(
         navigationIcon = {
@@ -203,6 +241,14 @@ fun EventDetailsTopBar(
                     Icon(
                         Icons.Filled.AccountCircle,
                         contentDescription = "View Participants",
+                        tint = Color.LightGray,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                IconButton(onClick = { addEventToGoogle() }) {
+                    Icon(
+                        Icons.Filled.DateRange,
+                        contentDescription = "Add to Google Calendar",
                         tint = Color.LightGray,
                         modifier = Modifier.fillMaxSize()
                     )

@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.planit_mobile.PlanItDependencyProvider
 import com.example.planit_mobile.ui.screens.auth.guest.GuestActivity
+import com.example.planit_mobile.ui.screens.calendar.CalendarActivity
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.ErrorPopup
 import com.example.planit_mobile.ui.screens.common.Idle
@@ -23,9 +24,9 @@ import com.example.planit_mobile.ui.screens.common.Loading
 import com.example.planit_mobile.ui.screens.common.LoadingScreen
 import com.example.planit_mobile.ui.screens.common.getOrNull
 import com.example.planit_mobile.ui.screens.common.idle
-import com.example.planit_mobile.ui.screens.profile.EditUserProfileActivity
-import com.example.planit_mobile.ui.screens.profile.UserProfileScreen
-import com.example.planit_mobile.ui.screens.profile.UserProfileViewModel
+import com.example.planit_mobile.ui.screens.myDetails.edit.EditDetailsActivity
+import com.example.planit_mobile.ui.screens.myDetails.UserProfileScreen
+import com.example.planit_mobile.ui.screens.myDetails.MyDetailsViewModel
 import com.example.planit_mobile.ui.screens.eventDetails.EventDetailsActivity
 import com.example.planit_mobile.ui.screens.nearMe.NearMeActivity
 import com.example.planit_mobile.ui.screens.searchEvent.SearchEventScreen
@@ -45,8 +46,8 @@ class HomeActivity : ComponentActivity() {
         HomeViewModel.factory(dependencies.userService, dependencies.eventService, dependencies.sessionStorage)
     }
 
-    private val userViewModel by viewModels<UserProfileViewModel> {
-        UserProfileViewModel.factory(dependencies.userService, dependencies.sessionStorage)
+    private val userViewModel by viewModels<MyDetailsViewModel> {
+        MyDetailsViewModel.factory(dependencies.userService, dependencies.sessionStorage)
     }
 
     private val eventViewModel by viewModels<SearchEventViewModel> {
@@ -132,6 +133,9 @@ class HomeActivity : ComponentActivity() {
                                         homeViewModel.setHomeTabState(HomeTabState.PROFILE)
                                     },
                                     onHomeRequested = { lifecycleScope.launch {homeViewModel.refreshData()} },
+                                    onCalendarRequested = {
+                                        CalendarActivity.navigateTo(this@HomeActivity)
+                                    },
                                     onEventsRequested = {
                                         eventViewModel.searchEvents(null, 0)
                                         homeViewModel.setHomeTabState(HomeTabState.EVENTS)
@@ -163,6 +167,9 @@ class HomeActivity : ComponentActivity() {
                                     },
                                     dismissEventCreatedPopUp = {
                                         homeViewModel.dismissEventCreated()
+                                    },
+                                    onNearMeRequested = {
+                                        NearMeActivity.navigateTo(this@HomeActivity)
                                     }
                                 )
                                 ErrorPopup(
@@ -209,7 +216,7 @@ class HomeActivity : ComponentActivity() {
                                             GuestActivity.navigateTo(this@HomeActivity)
                                         },
                                         onEditProfileRequested = {
-                                            EditUserProfileActivity.navigateTo(this@HomeActivity)
+                                            EditDetailsActivity.navigateTo(this@HomeActivity)
                                         }
                                     )
                                     ErrorPopup(
