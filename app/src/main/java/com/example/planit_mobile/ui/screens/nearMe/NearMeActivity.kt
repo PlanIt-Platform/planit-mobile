@@ -21,7 +21,6 @@ import com.example.planit_mobile.services.models.NearbyEventsResult
 import com.example.planit_mobile.ui.screens.common.Error
 import com.example.planit_mobile.ui.screens.common.ErrorPopup
 import com.example.planit_mobile.ui.screens.common.Idle
-import com.example.planit_mobile.ui.screens.common.Loaded
 import com.example.planit_mobile.ui.screens.common.Loading
 import com.example.planit_mobile.ui.screens.common.LoadingScreen
 import com.example.planit_mobile.ui.screens.common.getOrNull

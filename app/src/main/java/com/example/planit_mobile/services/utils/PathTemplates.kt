@@ -1,5 +1,6 @@
 package com.example.planit_mobile.services.utils
 
+
 object PathTemplates {
     const val PLANIT_API_URL = "https://611d-2a01-14-8020-3680-d4d5-5a6a-840d-e06a.ngrok-free.app/api-planit"
 
@@ -30,16 +31,20 @@ object PathTemplates {
     private const val CREATE_POLL = "${PLANIT_API_URL}/event/{id}/poll"
     private const val POLL = "${PLANIT_API_URL}/event/{eventId}/poll/{pollId}"
     private const val VOTE_POLL = "${PLANIT_API_URL}/event/{eventId}/poll/{pollId}/vote/{optionId}"
+    private const val JOIN_EVENT_WITH_CODE = "${PLANIT_API_URL}/event/{code}"
 
     fun getEventPath(id: Int): String = GET_EVENT.replace("{id}", "$id")
 
     fun searchEventPath(query: String?, limit: Int?, offset: Int?): String {
-        val input = if (query != null) "${PLANIT_API_URL}/events?searchInput=${query}"
+        val formattedQuery = query?.replace(" ", "+")
+        val input = if (formattedQuery != null) "${PLANIT_API_URL}/events?searchInput=${formattedQuery}"
         else "${PLANIT_API_URL}/events?"
         val limitInput =
             if(query != null) "&" else "" + if (limit != null) "limit=${limit}" else ""
         val offsetInput =
-            if(limit != null || query != null) "&" else ""  + if (offset != null) "offset=${offset}" else ""
+            if(limit != null || query != null) {
+                "&" + if (offset != null) "offset=${offset}" else ""
+            } else ""  + if (offset != null) "offset=${offset}" else ""
         return input + limitInput + offsetInput
     }
 
@@ -90,5 +95,7 @@ object PathTemplates {
         VOTE_POLL.replace("{eventId}", "$eventId")
             .replace("{pollId}", "$pollId")
             .replace("{optionId}", "$optionId")
+
+    fun getJoinEventWithCodePath(code: String): String = JOIN_EVENT_WITH_CODE.replace("{code}", code)
 
 }

@@ -235,6 +235,20 @@ class HomeActivity : ComponentActivity() {
                                 homeViewModel.categoriesState.collectAsState(initial = emptyList()).value
                             val eventErrorMessage = eventViewModel.errorState.collectAsState(
                                 initial = Error("")).value.message
+                            val joinEventWithCode = eventViewModel.joinEventWithCodeState.collectAsState(
+                                initial = null).value
+                            if(joinEventWithCode != null){
+                                val eventDetailsState = eventViewModel.eventDetailsState.collectAsState(
+                                    initial = null).value
+                                if (eventDetailsState != null){
+                                    eventViewModel.dismissJoinEventWithCode()
+                                    EventDetailsActivity.navigateTo(
+                                        this@HomeActivity,
+                                        joinEventWithCode,
+                                        eventDetailsState.visibility
+                                    )
+                                }
+                            }
                             SearchEventScreen(
                                 onProfileRequested = {
                                     homeViewModel.setHomeTabState(HomeTabState.PROFILE)
@@ -258,8 +272,11 @@ class HomeActivity : ComponentActivity() {
                                 onEventClick = { event ->
                                     EventDetailsActivity.navigateTo(this@HomeActivity, event.id, event.visibility)
                                 },
-                                searchEventCode = {
-
+                                searchEventCode = { code ->
+                                    eventViewModel.joinEventWithCode(code)
+                                },
+                                getMoreEvents = { query, offset ->
+                                    eventViewModel.getMoreEvents(query, offset)
                                 }
                             )
                             ErrorPopup(

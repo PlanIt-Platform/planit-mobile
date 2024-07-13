@@ -629,7 +629,7 @@ fun CreateEventPopup(
     if (eventCreatedPopUp) {
         //clear all fields
         eventName = ""; eventDescription = ""; selectedCategory = ""; locationType = ""
-        location = ""; locationCoords = LatLng(0.0,0.0);
+        location = ""; locationCoords = LatLng(0.0,0.0)
         selectedVisibility = ""; startDateTime = ""; endDateTime = ""; amount = ""; currency = ""
         password = ""
 

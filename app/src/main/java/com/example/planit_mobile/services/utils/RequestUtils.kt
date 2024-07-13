@@ -1,6 +1,5 @@
 package com.example.planit_mobile.services.utils
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.sessionStorage.SessionDataStore

@@ -28,7 +28,7 @@ class GuestActivity : ComponentActivity() {
     private val dependencies by lazy { application as PlanItDependencyProvider }
 
     private val viewModel by viewModels<GuestViewModel> {
-        GuestViewModel.factory(dependencies.userService, dependencies.sessionStorage)
+        GuestViewModel.factory(dependencies.sessionStorage)
     }
 
     companion object {

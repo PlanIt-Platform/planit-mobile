@@ -14,7 +14,7 @@ fun LoadingScreen(
     Box(
         contentAlignment = Alignment.TopStart
     ){
-        BackArrow() {
+        BackArrow {
             onBackRequested()
         }
     }
